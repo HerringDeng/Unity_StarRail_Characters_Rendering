@@ -51,6 +51,7 @@ Shader "Unlit/SR_Shader"
             #pragma fragment Frag
             
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/BRDF.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/GlobalIllumination.hlsl"
 
@@ -108,6 +109,17 @@ Shader "Unlit/SR_Shader"
                 return output;
             }
 
+            half LightingHalfLambert(half3 lightDirWS, half3 normalWS)
+            {
+                half NdotL = saturate(dot(normalWS, lightDirWS));//范围 0.0 - 1.0
+                //_WrapValue 范围为[0.5,1]
+                //pow(dot(N,L)*_WrapValue+(1-_WrapValue),2);
+
+                //(NdotL * 0.5 + 0.5) 把亮度映射到0.5 - 1.0 之间,会多一个背光; 2.0这个参数一般都是2.0 不过可以自由调整看看是否合适你想要的效果;
+                half halfLambert = pow(NdotL * 0.5 + 0.5,2.0);
+                return halfLambert;
+            }
+
             half4 Frag(Varyings input) : SV_Target
             {
                 //颜色贴图
@@ -128,6 +140,14 @@ Shader "Unlit/SR_Shader"
                 #endif
                 environmentColor = lerp(environmentColor, baseColor, _EnvironmentMixBaseIntensity); //环境光颜色混合基础色
 
+                //漫反射
+                Light mainLight = GetMainLight();
+                half3 lightColor = mainLight.color * mainLight.distanceAttenuation;
+                // half3 lambert = LightingLambert(lightColor, mainLight.direction,normalize(input.normalWS));
+                half halfLambert = LightingHalfLambert(mainLight.direction, normalize(input.normalWS));
+                half3 diffuseColor = lightColor * halfLambert;
+
+
                 //自发光
                 half3 emission = 0;
                 #if _EMISSION_ON
@@ -143,7 +163,7 @@ Shader "Unlit/SR_Shader"
                 color += environmentColor * _EnvironmentIntensity; //环境光
                 color += emission * _EmissionIntensity; //自发光
                 // 测试输出
-                half4 final_color = half4(color, _Aphla);
+                half4 final_color = half4(diffuseColor, _Aphla);
                 return final_color;
             }
             ENDHLSL
