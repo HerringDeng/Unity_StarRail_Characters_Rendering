@@ -20,7 +20,7 @@ Shader "Unlit/SR_Shader"
         [Header(EnvironmentLighting_Setting)]
         _EnvironmentIntensity ("Environment Intensity", Range(0, 1)) = 0
         _FlattenNormal ("Flatten Normal", Range(0, 1)) = 0
-        [KeywordEnum(Off, On)]_AmbientOcclusion ("AmbientOcclusion(off/on)", float) = 0
+        //[KeywordEnum(Off, On)]_AmbientOcclusion ("AmbientOcclusion(off/on)", float) = 0
         _AmbientOcclusionIntensity ("Ambient Occlusion Intensity", Range(0, 1)) = 0
         _EnvironmentMixBaseIntensity ("Environment Mix Base Intentsity", Range(0, 1)) = 0
         
@@ -36,7 +36,7 @@ Shader "Unlit/SR_Shader"
         #pragma shader_feature_local _AREA_BODY
         #pragma shader_feature_local _AREA_FACE
         #pragma shader_feature_local _AREA_HAIR
-        #pragma shader_feature_local _AMBIENTOCCLUSION_ON
+        //#pragma shader_feature_local _AMBIENTOCCLUSION_ON
         #pragma shader_feature_local _EMISSION_ON
         ENDHLSL
 
@@ -117,21 +117,17 @@ Shader "Unlit/SR_Shader"
                 half alpha = _Aphla;
                 //光照图
                 half4 lightMap = SAMPLE_TEXTURE2D(_LightTex, sampler_LightTex, input.uv);
+
                 //环境光
                 half3 environmentColor = input.SH;
-                #if _AMBIENTOCCLUSION_ON
                 #if _AREA_BODY | _AREA_HAIR
                 environmentColor *= lerp(1, lightMap.r, _AmbientOcclusionIntensity); //光照图红通道记录环境光遮蔽（AO）信息
                 #endif
                 #if _AREA_FACE
+                // 脸部环境光，暂时不知道怎么使用FaceMap的红通道制作脸部环境光，待研究
+                #endif
+                environmentColor = lerp(environmentColor, baseColor, _EnvironmentMixBaseIntensity); //环境光颜色混合基础色
 
-                #endif
-                #endif
-                environmentColor = lerp(environmentColor, baseColor, _EnvironmentMixBaseIntensity);
-                environmentColor *= _EnvironmentIntensity;
-                #if _AREA_FACE
-
-                #endif
                 //自发光
                 half3 emission = 0;
                 #if _EMISSION_ON
@@ -143,13 +139,12 @@ Shader "Unlit/SR_Shader"
                 half3 albedo = 0;
                 albedo += baseColor;
                 //最终输出颜色
-                half4 color = half4(baseColor, alpha); //基础色
-                
-                color.rgb = lerp(color.rgb, color.rgb + emission, _EmissionIntensity); //自发光
-
+                half3 color = 0; //基础色
+                color += environmentColor * _EnvironmentIntensity; //环境光
+                color += emission * _EmissionIntensity; //自发光
                 // 测试输出
-                color.rgb = environmentColor;
-                return color;
+                half4 final_color = half4(color, _Aphla);
+                return final_color;
             }
             ENDHLSL
         }
