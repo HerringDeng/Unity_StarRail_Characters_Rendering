@@ -26,6 +26,7 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _AREA_FACE
+  - _RAMPTYPE_WARM
   m_InvalidKeywords:
   - _AMBIENTOCCLUSION_ON
   - _EMISSION_OFF
@@ -83,6 +84,18 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _RampTex_cold:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RampTex_cool:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RampTex_warm:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -104,7 +117,7 @@ Material:
     - _AlphaClip: 0
     - _AlphaToMask: 0
     - _AmbientOcclusion: 1
-    - _AmbientOcclusionIntensity: 1
+    - _AmbientOcclusionIntensity: 0.71
     - _Aphla: 1
     - _Area: 1
     - _Blend: 0
@@ -124,7 +137,7 @@ Material:
     - _EmissionIntensity: 0
     - _EmissionMixBaseIntensity: 0
     - _EnvironmentIntensity: 0.43
-    - _EnvironmentMixBaseIntensity: 1
+    - _EnvironmentMixBaseIntensity: 0.55
     - _EnvironmentReflections: 1
     - _FlattenNormal: 1
     - _GlossMapScale: 0
@@ -134,6 +147,7 @@ Material:
     - _OcclusionStrength: 1
     - _Parallax: 0.005
     - _QueueOffset: 0
+    - _RampType: 0
     - _ReceiveShadows: 1
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0

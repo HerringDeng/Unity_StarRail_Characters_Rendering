@@ -17,6 +17,11 @@ Shader "Unlit/SR_Shader"
         [Header(LightTextures_Setting)]
         _LightTex ("Light Texture", 2D) = "while" { }
 
+        [Header(RampMapping_Setting)]
+        [KeywordEnum(Warm, Cool)]_RampType("Ramp Texture Type", float) = 0
+        _RampTex_warm("Ramp Texture Warm", 2D) = "while" {}
+        _RampTex_cool("Ramp Texture Cool", 2D) = "while" {}
+
         [Header(EnvironmentLighting_Setting)]
         _EnvironmentIntensity ("Environment Intensity", Range(0, 1)) = 0
         _FlattenNormal ("Flatten Normal", Range(0, 1)) = 0
@@ -36,7 +41,8 @@ Shader "Unlit/SR_Shader"
         #pragma shader_feature_local _AREA_BODY
         #pragma shader_feature_local _AREA_FACE
         #pragma shader_feature_local _AREA_HAIR
-        //#pragma shader_feature_local _AMBIENTOCCLUSION_ON
+        #pragma shader_feature_local _RAMPTYPE_WARM
+        #pragma shader_feature_local _RAMPTYPE_COOL
         #pragma shader_feature_local _EMISSION_ON
         ENDHLSL
 
@@ -52,8 +58,8 @@ Shader "Unlit/SR_Shader"
             
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/BRDF.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/GlobalIllumination.hlsl"
+            // #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/BRDF.hlsl"
+            // #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/GlobalIllumination.hlsl"
 
             struct Attributes
             {
@@ -77,11 +83,17 @@ Shader "Unlit/SR_Shader"
             SAMPLER(sampler_MainTex);
             TEXTURE2D(_LightTex);
             SAMPLER(sampler_LightTex);
+            TEXTURE2D(_RampTex_warm);
+            SAMPLER(sampler_RampTex_warm);
+            TEXTURE2D(_RampTex_cool);
+            SAMPLER(sampler_RampTex_cool);
 
             CBUFFER_START(UnityPerMaterial)
                 half4 _MainTex_ST;
                 half4 _LightTex_ST;
                 half4 _BaseColor;
+                half4 _RampTex_warm_ST;
+                half4 _RampTex_cool_ST;
                 half _Aphla;
                 float _SrcMode;
                 float _DstMode;
@@ -112,12 +124,8 @@ Shader "Unlit/SR_Shader"
             half LightingHalfLambert(half3 lightDirWS, half3 normalWS)
             {
                 half NdotL = saturate(dot(normalWS, lightDirWS));//范围 0.0 - 1.0
-                //_WrapValue 范围为[0.5,1]
-                //pow(dot(N,L)*_WrapValue+(1-_WrapValue),2);
-
-                //(NdotL * 0.5 + 0.5) 把亮度映射到0.5 - 1.0 之间,会多一个背光; 2.0这个参数一般都是2.0 不过可以自由调整看看是否合适你想要的效果;
-                half halfLambert = pow(NdotL * 0.5 + 0.5,2.0);
-                return halfLambert;
+                half diffuse = pow(NdotL * 0.5 + 0.5,2.0);
+                return diffuse;
             }
 
             half4 Frag(Varyings input) : SV_Target
@@ -143,11 +151,20 @@ Shader "Unlit/SR_Shader"
                 //漫反射
                 Light mainLight = GetMainLight();
                 half3 lightColor = mainLight.color * mainLight.distanceAttenuation;
-                // half3 lambert = LightingLambert(lightColor, mainLight.direction,normalize(input.normalWS));
-                half halfLambert = LightingHalfLambert(mainLight.direction, normalize(input.normalWS));
-                half3 diffuseColor = lightColor * halfLambert;
-
-
+                half3 diffuse = LightingLambert(lightColor, mainLight.direction,normalize(input.normalWS));
+                // half diffuse = LightingHalfLambert(mainLight.direction, normalize(input.normalWS));
+                half2 rampUV = 0;
+                rampUV.x = diffuse;
+                rampUV.y = lightMap.a;
+                half3 rampColor = 0;
+                #if _RAMPTYPE_WARM
+                rampColor = SAMPLE_TEXTURE2D(_RampTex_warm, sampler_RampTex_warm, rampUV);
+                #endif
+                #if _RAMPTYPE_COOL
+                rampColor = SAMPLE_TEXTURE2D(_RampTex_cool, sampler_RampTex_cool, rampUV);
+                #endif
+                half3 diffuseColor = lightColor * baseColor * rampColor;
+                
                 //自发光
                 half3 emission = 0;
                 #if _EMISSION_ON
@@ -156,12 +173,10 @@ Shader "Unlit/SR_Shader"
                     emission = lerp(half3(0, 0, 0), emission, emission_area); //选择自发光区域
                 #endif
 
-                half3 albedo = 0;
-                albedo += baseColor;
                 //最终输出颜色
-                half3 color = 0; //基础色
-                color += environmentColor * _EnvironmentIntensity; //环境光
-                color += emission * _EmissionIntensity; //自发光
+                half3 albedo = 0; //基础色
+                albedo += environmentColor * _EnvironmentIntensity; //环境光
+                albedo += emission * _EmissionIntensity; //自发光
                 // 测试输出
                 half4 final_color = half4(diffuseColor, _Aphla);
                 return final_color;
