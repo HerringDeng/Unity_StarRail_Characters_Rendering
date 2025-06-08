@@ -33,6 +33,9 @@ Shader "Custom/SR_Character_Shader"
         //[KeywordEnum(Off, On)]_AmbientOcclusion ("AmbientOcclusion(off/on)", float) = 0
         _AmbientOcclusionIntensity ("Ambient Occlusion Intensity", Range(0, 1)) = 0
         _EnvironmentMixBaseIntensity ("Environment Mix Base Intentsity", Range(0, 1)) = 0
+
+        [Header(Specular)]
+        _MetalArea("Metal Area", Range(0, 1)) = 0
         
         [Header(Emission_Setting)]
         [KeywordEnum(Off, On)]_Emission ("Emission(off/on)", float) = 0
@@ -121,6 +124,8 @@ Shader "Custom/SR_Character_Shader"
                 half4 _EmissionColor;
                 float _EmissionMixBaseIntensity;
                 float _EmissionIntensity;
+
+                float _MetalArea;
             CBUFFER_END
 
             Varyings Vert(Attributes input)
@@ -136,14 +141,14 @@ Shader "Custom/SR_Character_Shader"
                 output.SH = SampleSH(lerp(vertexNormalInput.normalWS, float3(0, 0, 0), _FlattenNormal));
                 return output;
             }
-
+            //半兰伯特
             half LightingHalfLambert(half3 lightDirWS, half3 normalWS)
             {
                 half NdotL = saturate(dot(normalWS, lightDirWS));//范围 0.0 - 1.0
                 half diffuseDark = pow(NdotL * 0.5 + 0.5,2.0);
                 return diffuseDark;
             }
-
+            //去色函数
             half3 desaturation(half3 color, half3 glayXfer = half3(0.3, 0.59, 0.11))
             {
                 return dot(color, glayXfer);
@@ -171,7 +176,9 @@ Shader "Custom/SR_Character_Shader"
                 environmentColor *= _EnvironmentIntensity;
                 //漫反射
                 Light mainLight = GetMainLight();
+                //光照颜色
                 half3 lightColor = lerp(desaturation(mainLight.color), mainLight.color, _MainLigthColorIntensity) * mainLight.distanceAttenuation;
+                //主光源方向
                 float3 lightDir = mainLight.direction;
                 half diffuseDark = 0;
                 half3 diffuseColor = 0;
@@ -210,6 +217,19 @@ Shader "Custom/SR_Character_Shader"
                 rampColor = SAMPLE_TEXTURE2D(_RampTex_cool, sampler_RampTex_cool, rampUV).rgb;
                 #endif
                 diffuseColor = lightColor * baseColor * mixDarkColor * rampColor;
+                //高光
+                half3 specularColor = 0;
+                half3 specular = 0;
+                #if _AREA_BODY
+                specular = lightMap.b;
+                specular = lerp(specular, baseColor, step(abs(lightMap.a-_MetalArea), 0.1));
+                #endif
+                #if _AREA_HAIR
+                specular = lightMap.b;
+                specular = lerp(specular, baseColor, step(abs(lightMap.a-_MetalArea), 0.1));
+                #endif
+
+                specularColor = LightingSpecular(lightColor, lightDir, input.normalWS, input.viewDirWS, (specular, 1), 100);
                 
                 //自发光
                 half3 emission = 0;
@@ -224,7 +244,7 @@ Shader "Custom/SR_Character_Shader"
                 albedo = lerp(diffuseColor, environmentColor, _EnvironmentIntensity);
                 albedo += emission * _EmissionIntensity; //自发光
                 // 测试输出
-                half4 final_color = half4(half3(1, 1, 1)*albedo, _Aphla);
+                half4 final_color = half4(specular, _Aphla);
                 return final_color;
             }
             ENDHLSL
