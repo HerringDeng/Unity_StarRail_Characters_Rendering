@@ -26,10 +26,14 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _AREA_BODY
+  - _EMISSION_OFF
+  - _OUTLINE_DYNAMIC_MODE
   - _RAMPTYPE_WARM
   m_InvalidKeywords:
   - _AMBIENTOCCLUSION_ON
-  - _EMISSION_OFF
+  - _DYNAMICOUTLINEWIDTH_ON
+  - _OUTLINENORMAL_UV7_SMOOTH_NORMAL
+  - _OUTLINE_WIDTH_MODE
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -61,6 +65,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMapTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -137,8 +145,13 @@ Material:
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _DstMode: 0
+    - _DynamicOutline: 0
+    - _DynamicOutlineMaxWidth: 2
+    - _DynamicOutlineMinWidth: 0.7
+    - _DynamicOutlineWidth: 1
     - _Emission: 0
-    - _EmissionIntensity: 0
+    - _EmissionIntensity: 0.1
+    - _EmissionMixBaseColorIntensity: 1
     - _EmissionMixBaseIntensity: 0
     - _EnvironmentIntensity: 0.2
     - _EnvironmentMixBaseIntensity: 0.4
@@ -152,7 +165,17 @@ Material:
     - _GlossyReflections: 0
     - _MainLigthColorIntensity: 1
     - _Metallic: 0
+    - _NoLMaxThreshold: 1
+    - _NoseShadowSoftness: 0
+    - _NoseShadowThreshold: 1
     - _OcclusionStrength: 1
+    - _Outline: 3
+    - _OutlineBackwardOffset: 0
+    - _OutlineMaxWidth: 2
+    - _OutlineMinWidth: 1
+    - _OutlineNormal: 1
+    - _OutlineWidth: 2
+    - _OutlineZBias: 1.8
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _RampDarkCenter: 0
@@ -166,17 +189,20 @@ Material:
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
+    - _SpecularIntensity: 20
+    - _SpecularSmoothness: 30
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _SrcMode: 1
     - _Surface: 0
+    - _UsingEmisionMap: 0
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _DarkColor: {r: 0.8301887, g: 0.755785, b: 0.77100396, a: 1}
-    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
     - _HeadCenterPosition: {r: -3.4502797e-16, g: 1.4028066, b: 0.00043246895, a: 0}
     - _HeadCenterVector: {r: 0, g: 0, b: 0, a: 1}
     - _HeadForwardPosition: {r: 0, g: 0.0000007947286, b: 1, a: 0}
@@ -184,6 +210,7 @@ Material:
     - _HeadRightPosition: {r: 1, g: 0, b: -0.000000024835268, a: 0}
     - _HeadRightVector: {r: 1, g: 0, b: -0.000000024835268, a: 0}
     - _HeadUpVector: {r: -1.9737297e-14, g: 1, b: -0.0000007947286, a: 0}
+    - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _ShadowColor: {r: 0.7924528, g: 0.6915272, b: 0.6915272, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
