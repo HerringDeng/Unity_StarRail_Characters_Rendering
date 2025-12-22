@@ -181,7 +181,7 @@ Material:
     - _OutlineMinWidth: 1
     - _OutlineNormal: 1
     - _OutlineWidth: 2
-    - _OutlineZBias: 1.8
+    - _OutlineZBias: 18
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _RampDarkCenter: 0.1
