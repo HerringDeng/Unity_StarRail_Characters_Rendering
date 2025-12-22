@@ -58,6 +58,8 @@ Shader "Custom/HSR_Character_Shader"
 
         [Header(Nose_Shadow)]
         _NoseShadowPow("Nose Shadow Pow", float) = 10
+        _NoseShadowDarkness("Nose Shadow Darkness", range(0, 1)) = 0.6
+        _NoseShadowGamma("Nose Shadow Gamma", float) = 16
         _NoseShadowThreshold ("Nose Shadow Threshold", range(0, 1)) = 0
         _NoseShadowSoftness("Nose Shadow Softness", range(0,1)) = 0
     }

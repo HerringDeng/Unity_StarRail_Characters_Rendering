@@ -58,6 +58,8 @@ CBUFFER_START(UnityPerMaterial)
     float _DynamicOutlineMaxWidth;
     //鼻影
     float _NoseShadowPow;
+    float _NoseShadowDarkness;
+    float _NoseShadowGamma;
     float _NoseShadowThreshold;
     float _NoseShadowSoftness;
 CBUFFER_END
@@ -194,11 +196,14 @@ half4 Frag(Varyings input) : SV_Target
     #endif
     //鼻影
     half noseShadow = 0;
+    half3 noseShadowColor = _OutlineColor;
     #if _AREA_FACE
         half3 cameraForward = TransformViewToWorld(half3(0, 0, 1));
-        float noseShadowValue = pow(saturate(dot(_HeadForwardVector, cameraForward)), _NoseShadowPow);
-        noseShadowValue = smoothstep(_NoseShadowThreshold - _NoseShadowSoftness, _NoseShadowThreshold + _NoseShadowSoftness, noseShadowValue);
-        noseShadow = noseShadowValue * lightMap.b;
+        noseShadow = pow(saturate(dot(_HeadForwardVector, cameraForward)), _NoseShadowPow);
+        noseShadow *= lightMap.b;
+        noseShadow = smoothstep(_NoseShadowThreshold - _NoseShadowSoftness, _NoseShadowThreshold + _NoseShadowSoftness, noseShadow);
+        noseShadowColor = pow(noseShadowColor, 1.0/_NoseShadowGamma);
+        noseShadowColor = lerp(noseShadowColor, (0,0,0), _NoseShadowDarkness);
     #endif
     
     // 最终输出颜色
@@ -208,6 +213,7 @@ half4 Frag(Varyings input) : SV_Target
     albedo += emission * _EmissionIntensity; //自发光
     #if _AREA_FACE
         albedo = lerp(albedo, _OutlineColor.rgb, lightMap.b);
+        albedo = lerp(albedo, albedo*noseShadowColor, noseShadow);
     #endif
     // 测试输出
     half4 final_color = half4(albedo, alpha);

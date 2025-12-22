@@ -53,6 +53,8 @@ CBUFFER_START(UnityPerMaterial)
     float _DynamicOutlineMaxWidth;
     //鼻影
     float _NoseShadowPow;
+    float _NoseShadowDarkness;
+    float _NoseShadowGamma;
     float _NoseShadowThreshold;
     float _NoseShadowSoftness;
 CBUFFER_END

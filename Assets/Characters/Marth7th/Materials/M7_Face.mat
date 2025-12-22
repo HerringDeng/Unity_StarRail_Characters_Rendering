@@ -170,10 +170,12 @@ Material:
     - _Metallic: 0
     - _NoLMaxThreshold: 1
     - _Normal: 0
+    - _NoseShadowDarkness: 0.6
     - _NoseShadowDisapper: 0
-    - _NoseShadowPow: 1
-    - _NoseShadowSoftness: 0.05
-    - _NoseShadowThreshold: 0.86
+    - _NoseShadowGamma: 16
+    - _NoseShadowPow: 20
+    - _NoseShadowSoftness: 0.125
+    - _NoseShadowThreshold: 0.125
     - _OcclusionStrength: 1
     - _Outline: 3
     - _OutlineBackwardOffset: 0
@@ -181,7 +183,7 @@ Material:
     - _OutlineMinWidth: 1
     - _OutlineNormal: 1
     - _OutlineWidth: 2
-    - _OutlineZBias: 18
+    - _OutlineZBias: 40
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _RampDarkCenter: 0.1
@@ -217,6 +219,7 @@ Material:
     - _HeadRightPosition: {r: 1, g: 0, b: -0.000000024835268, a: 0}
     - _HeadRightVector: {r: 1, g: 0, b: -0.000000024835268, a: 0}
     - _HeadUpVector: {r: -1.9737297e-14, g: 1, b: -0.0000007947286, a: 0}
+    - _NoseShadowColor: {r: 0, g: 0, b: 0, a: 1}
     - _OutlineColor: {r: 0.33962262, g: 0, b: 0, a: 1}
     - _ShadowColor: {r: 0.9245283, g: 0.9245283, b: 0.9245283, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
