@@ -1,5 +1,18 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-2743713576714763402
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 7
 --- !u!21 &2100000
 Material:
   serializedVersion: 8
@@ -7,18 +20,33 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: FaceMask
-  m_Shader: {fileID: 4800000, guid: 650dd9526735d5b46b79224bc6e94025, type: 3}
+  m_Name: M7_Body2_MMD
+  m_Shader: {fileID: 4800000, guid: fb2e41cdaeb347c45b6fb7f9cba99f5b, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
-  m_InvalidKeywords: []
+  m_ValidKeywords:
+  - _AREA_BODY
+  - _EMISSION_ON
+  - _OUTLINENORMAL_COMPRESSED_NO
+  - _OUTLINE_DYNAMIC_MODE
+  - _RAMPTYPE_WARM
+  m_InvalidKeywords:
+  - _AMBIENTOCCLUSION_ON
+  - _DYNAMICOUTLINEWIDTH_ON
+  - _DYNAMICOUTLINE_ON
+  - _EMISSION_ALL_AREA
+  - _NORMAL_COMMON
+  - _OUTLINENORMALCOMPRESSED_NO
+  - _OUTLINENORMAL_CHANNEL_NO
+  - _OUTLINENORMAL_UV7_SMOOTH_NORMAL
+  - _OUTLINE_NORMALCOMPRESSED_OCT
+  - _OUTLINE_NORMALCOMPRESSED_YES
+  - _OUTLINE_WIDTH_MODE
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
-  stringTagMap:
-    RenderType: Opaque
+  stringTagMap: {}
   disabledShaderPasses: []
   m_LockedProperties: 
   m_SavedProperties:
@@ -48,12 +76,20 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _LightMapTex:
+    - _EmissionMapTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _LightMapTex:
+        m_Texture: {fileID: 2800000, guid: 25b950666d3940b4491faa483c2a734e, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _LightTex:
+        m_Texture: {fileID: 2800000, guid: 25b950666d3940b4491faa483c2a734e, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 41edc6567a9f72d4b9b916eda58fac92, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -68,12 +104,16 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _RampTex_cool:
+    - _RampTex_cold:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _RampTex_cool:
+        m_Texture: {fileID: 2800000, guid: d5cd557becfa3704a99b7c7bb492ed11, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _RampTex_warm:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 4b3ec5470b0f3674bb1f16b2e8e828e0, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:
@@ -96,7 +136,8 @@ Material:
     m_Floats:
     - _AlphaClip: 0
     - _AlphaToMask: 0
-    - _AmbientOcclusionIntensity: 0
+    - _AmbientOcclusion: 1
+    - _AmbientOcclusionIntensity: 0.5
     - _Aphla: 1
     - _Area: 0
     - _Blend: 0
@@ -105,69 +146,90 @@ Material:
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
-    - _Cull: 2
+    - _Cull: 0
     - _Cutoff: 0.5
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _DstMode: 0
-    - _Emission: 0
-    - _EmissionIntensity: 0
-    - _EmissionMixBaseColorIntensity: 0
-    - _EnvironmentIntensity: 0
-    - _EnvironmentMixBaseIntensity: 0
+    - _DynamicOutline: 1
+    - _DynamicOutlineMaxWidth: 2
+    - _DynamicOutlineMinWidth: 0.7
+    - _DynamicOutlineWidth: 1
+    - _Emission: 1
+    - _EmissionIntensity: 0.1
+    - _EmissionMixBaseColorIntensity: 1
+    - _EmissionMixBaseIntensity: 0
+    - _EnvironmentIntensity: 0.2
+    - _EnvironmentMixBaseIntensity: 0.4
     - _EnvironmentReflections: 1
-    - _FlattenNormal: 0
+    - _FaceSDF_offset: 0.001
+    - _FaceSDF_softness: 0.01
+    - _FaceSDF_threshold: 0
+    - _FlattenNormal: 1
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _MainLigthColorIntensity: 0
+    - _MainLigthColorIntensity: 1
+    - _MetalArea: 0.56
     - _Metallic: 0
-    - _NoLMaxThreshold: 1
+    - _NoLMaxThreshold: 0.65
+    - _Normal: 0
+    - _NoseShadowDarkness: 0.6
+    - _NoseShadowDisapper: 10
+    - _NoseShadowGamma: 16
+    - _NoseShadowPow: 10
+    - _NoseShadowSoftness: 0
+    - _NoseShadowThreshold: 1
     - _OcclusionStrength: 1
-    - _Outline: 0
-    - _OutlineWidth: 0
-    - _OutlineZBias: 0
+    - _Outline: 3
+    - _OutlineBackwardOffset: 0
+    - _OutlineMaxWidth: 2
+    - _OutlineMinWidth: 1
+    - _OutlineNormal: 1
+    - _OutlineNormalCompressed: 0
+    - _OutlineNormal_Channel: 0
+    - _OutlineNormal_Compressed: 0
+    - _OutlineWidth: 2
+    - _OutlineZBias: 1.8
+    - _Outline_NormalCompressed: 1
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _RampDarkCenter: 0
-    - _RampDarkSoftness: 0
+    - _RampDarkSoftness: 0.05
+    - _RampShadowCenter: 0
+    - _RampShadowOffset: 0
+    - _RampShadowSoftness: 0.028
+    - _RampShadowThreshold: 0.02
     - _RampType: 0
     - _ReceiveShadows: 1
-    - _SampleGI: 0
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
-    - _SpecularIntensity: 1
-    - _SpecularSmoothness: 1
+    - _SpecularIntensity: 20
+    - _SpecularSmoothness: 30
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
-    - _SrcMode: 0
+    - _SrcMode: 1
     - _Surface: 0
+    - _UsingEmisionAreaMap: 0
+    - _UsingEmisionMap: 0
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _DarkColor: {r: 0, g: 0, b: 0, a: 1}
-    - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
+    - _DarkColor: {r: 0.8301887, g: 0.755785, b: 0.77100396, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _HeadCenterPosition: {r: -3.4502797e-16, g: 1.4028066, b: 0.00043246895, a: 0}
+    - _HeadCenterVector: {r: 0, g: 0, b: 0, a: 1}
+    - _HeadForwardPosition: {r: 0, g: 0.0000007947286, b: 1, a: 0}
     - _HeadForwardVector: {r: 0, g: 0.0000007947286, b: 1, a: 0}
+    - _HeadRightPosition: {r: 1, g: 0, b: -0.000000024835268, a: 0}
     - _HeadRightVector: {r: 1, g: 0, b: -0.000000024835268, a: 0}
     - _HeadUpVector: {r: -1.9737297e-14, g: 1, b: -0.0000007947286, a: 0}
-    - _OutlineColor: {r: 0, g: 0, b: 0, a: 0}
+    - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
+    - _ShadowColor: {r: 0.7924528, g: 0.6915272, b: 0.6915272, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
---- !u!114 &4650735924101895139
-MonoBehaviour:
-  m_ObjectHideFlags: 11
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  version: 7
