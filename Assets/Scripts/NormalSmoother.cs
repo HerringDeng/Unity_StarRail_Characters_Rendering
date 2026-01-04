@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using Unity.Mathematics;
 
 public class NormalSmoother : MonoBehaviour
 {
@@ -19,6 +20,7 @@ public class NormalSmoother : MonoBehaviour
         var normals = mesh.normals;
         var tangents = mesh.tangents;
         var smoothNormals = mesh.normals;
+        var compressNormals = new Vector2[smoothNormals.Length];
         Debug.Log("开始遍历三角形顶点，并保存其所在三角形的法线和夹角");
         for (int i = 0; i <= triangles.Length - 3; i += 3)
         {
@@ -82,8 +84,29 @@ public class NormalSmoother : MonoBehaviour
             var tbn = new Matrix4x4(tangent, binormal, normal, Vector3.zero);
             tbn = tbn.transpose;
             smoothNormals[i] = tbn.MultiplyVector(smoothNormals[i]).normalized;
+            compressNormals[i] = OctahedronCompress(smoothNormals[i]);
         }
-        mesh.SetUVs(7, smoothNormals);
+        mesh.SetUVs(1, compressNormals);
+    }
+
+    Vector2 OctahedronCompress(Vector3 sn)
+    {
+        Vector2 on = Vector2.zero;
+        float L1 = math.abs(sn.x) + math.abs(sn.y) + math.abs(sn.z);
+        sn/= L1;
+        if (sn.z > 0)
+        {
+            on.x = sn.x;
+            on.y = sn.y;
+        }
+        else
+        {
+            on.x = (1 - math.abs(sn.y)) * math.sign(sn.x);
+            on.y = (1 - math.abs(sn.x)) * math.sign(sn.y);
+        }
+        on.x = (on.x+1.0f)/2.0f;
+        on.y = (on.y+1.0f)/2.0f;
+        return on;
     }
     void StartSmooth()
     {
@@ -97,10 +120,10 @@ public class NormalSmoother : MonoBehaviour
         }
     }
 
-    void Awake()
-    {
-        StartSmooth();
-    }
+    // void Awake()
+    // {
+    //     StartSmooth();
+    // }
 
 #if UNITY_EDITOR
     [CustomEditor(typeof(NormalSmoother))]
@@ -111,7 +134,7 @@ public class NormalSmoother : MonoBehaviour
             DrawDefaultInspector(); // 绘制默认的Inspector GUI元素
             NormalSmoother myScript = (NormalSmoother)target;
 
-            if (GUILayout.Button("平滑法线并保存到uv7"))
+            if (GUILayout.Button("平滑法线并保存到uv1"))
             {
                 myScript.StartSmooth();
             }

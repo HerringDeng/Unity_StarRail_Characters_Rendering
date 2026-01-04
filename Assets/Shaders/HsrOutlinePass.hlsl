@@ -2,7 +2,7 @@
 #define HSR_OUTLINE_PASS
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-#include "HsrRenderFunction.hlsl"
+#include "HsrShaderFunction.hlsl"
 
 TEXTURE2D(_SdfLightMap);
 SAMPLER(sampler_SdfLightMap);
@@ -54,43 +54,15 @@ CBUFFER_START(UnityPerMaterial)
     float _NoseOutlineThreshold;
     float _NoseOutlineSoftness;
 CBUFFER_END
-#ifdef _OUTLINENORMALCHANNEL_UV1
-    struct Attributes
-    {
-        float3 positionOS : POSITION;
-        float3 normalOS : NORMAL;
-        float4 tangentOS : TANGENT;
-        float2 uv : TEXCOORD0;
-        float3 outlineNormal : TEXCOORD1;
-    };
-#elif _OUTLINENORMALCHANNEL_UV7
-    struct Attributes
-    {
-        float3 positionOS : POSITION;
-        float3 normalOS : NORMAL;
-        float4 tangentOS : TANGENT;
-        float2 uv : TEXCOORD0;
-        float3 outlineNormal : TEXCOORD7;
-    };
-#elif _OUTLINENORMALCHANNEL_VC
-    struct Attributes
-    {
-        float3 positionOS : POSITION;
-        float3 normalOS : NORMAL;
-        float4 tangentOS : TANGENT;
-        float2 uv : TEXCOORD0;
-        float3 outlineNormal : COLOR;
-    };
-#else
-    struct Attributes
-    {
-        float3 positionOS : POSITION;
-        float3 normalOS : NORMAL;
-        float4 tangentOS : TANGENT;
-        float2 uv : TEXCOORD0;
-        float3 outlineNormal : NORMAL;
-    };
-#endif
+
+struct Attributes
+{
+    float3 positionOS : POSITION;
+    float3 normalOS : NORMAL;
+    float4 tangentOS : TANGENT;
+    float2 uv : TEXCOORD0;
+    float3 outlineNormal : TEXCOORD1;
+};
 
 struct Varyings
 {
@@ -111,9 +83,7 @@ Varyings Vert(Attributes input)
     outlinePostionWS += biasDir / biasScale * _OutlineZBias;
     //法线
     float3 normalTS = input.outlineNormal.xyz;
-    #if _OUTLINENORMALCOMPRESSION_OCT
-        normalTS = normalize(unit_octahedron_to_vector(normalTS.xy*2-1));
-    #endif
+    normalTS = normalize(UnitOctahedronUVtoNormal(normalTS.xy, false));
     float3 normalWS = mul(normalTS, tnb);
     float3 positionVS = TransformWorldToView(outlinePostionWS);
     float3 normalVS = TransformWorldToViewDir(normalWS);

@@ -4,7 +4,7 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 // #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/BRDF.hlsl"
 // #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/GlobalIllumination.hlsl"
-#include "HsrRenderFunction.hlsl"
+#include "HsrShaderFunction.hlsl"
 
 TEXTURE2D(_BaseMap);
 SAMPLER(sampler_BaseMap);
@@ -104,7 +104,7 @@ half4 Frag(Varyings input) : SV_Target
     half4 lightMap = SAMPLE_TEXTURE2D(_SdfLightMap, sampler_SdfLightMap, input.uv);
     half alpha = _Alpha;
     Light mainLight = GetMainLight();
-    half3 mainLightColor = mainLight.distanceAttenuation;
+    half3 mainLightColor = mainLight.color;
     float3 mainLightDir = mainLight.direction;
 
     // 间接光照
@@ -151,13 +151,8 @@ half4 Frag(Varyings input) : SV_Target
         specularColor = lerp(_SpecularColor.rgb, baseColor, lightMap.b);
         specularResult = BlinnPhongSpecular(mainLightColor, mainLightDir, input.viewDirWS, input.normalWS, specularColor, _SpecularExponent);
     #elif _AREA_HAIR //非真实高光
-        float specularArea = lightMap.b;
-        specularColor = lerp(half3(0, 0, 0), mainLightColor, specularArea);
-        specularResult = lerp(half3(0, 0, 0), _SpecularColor.rgb, diffuseLightUp);
-    #elif _AREA_FACE //非真实高光
-        float specularArea = baseMap.a;
-        specularColor = lerp(half3(0, 0, 0), mainLightColor, specularArea);
-        specularResult = lerp(half3(0, 0, 0), _SpecularColor.rgb, diffuseLightUp);
+        specularColor = lerp(_SpecularColor.rgb, baseColor, lightMap.b);
+        specularResult = lerp(half3(0, 0, 0), specularColor, diffuseLightUp);
     #endif
     // 自发光
     half3 emissionResult = 0;

@@ -54,8 +54,6 @@ Shader "Custom/HsrCharacterToon"
         [Header(Outline)]
         [KeywordEnum(Off, On)]_Outline ("Outline Off/On", float) = 0
         [KeywordEnum(Fixed_Width, Fixed_Pixel, Dynamic_Width)]_OutlineType("Outline Width Control Type", float) = 0
-        [KeywordEnum(No, UV1, UV7, VC)]_OutlineNormalChannel("Outline Normal Channel", float) = 0
-        [KeywordEnum(No, OCT)]_OutlineNormalCompression("Outline Normal Compression", float) = 0
         _OutlineWidth ("Outline Width or Pixel", float) = 0
         [HideInInspector]_OutlineWidthScale("Outline Width Scale(Pixel Invalid)", float) = 0.0009
         _OutlineMinWidth("Outline Min Width(Dynamic Only)", float) = 0
@@ -148,8 +146,6 @@ Shader "Custom/HsrCharacterToon"
             #pragma fragment Frag
             #pragma shader_feature_local _ _OUTLINE_OFF _OUTLINE_ON
             #pragma shader_feature_local _ _OUTLINETYPE_FIXED_WIDTH _OUTLINETYPE_FIXED_PIXEL _OUTLINETYPE_DYNAMIC_WIDTH
-            #pragma shader_feature_local _ _OUTLINENORMALCHANNEL_NO _OUTLINENORMALCHANNEL_UV1 _OUTLINENORMALCHANNEL_UV7 _OUTLINENORMALCHANNEL_VC
-            #pragma shader_feature_local _ _OUTLINENORMALCOMPRESSION_NO _OUTLINENORMALCOMPRESSION_OCT
             // -------------------------------------
             // Universal Pipeline keywords
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
