@@ -12,7 +12,6 @@ Shader "Custom/HsrCharacterToon"
         [Header(Color Setting)]
         [MainColor] _BaseColor ("Color", Color) = (1, 1, 1, 1)
         _ShadowColor ("Shadow Color", Color) = (0, 0, 0, 1)
-        _SpecularColor("Specular Color", Color) = (1, 1, 1, 1)
         _OutlineColor ("Outline Color", Color) = (0, 0, 0, 1)
         _NoseOutlineColor("Nose Outline Color", Color) = (0, 0, 0, 1)
 
@@ -41,6 +40,7 @@ Shader "Custom/HsrCharacterToon"
         _IndirectLightingBaseColorMixing ("Base Color Indirect Lighting Mixing", Range(0, 1)) = 0
 
         [Header(Specular Lighting Setting)]
+        _Metallic("Metallic", Range(0, 1)) = 1
         _SpecularLightingIntensity("Specular Lighting Intensity", Range(0, 100)) = 1
         _SpecularExponent ("Specular Exponent", float) = 1
         
@@ -51,7 +51,7 @@ Shader "Custom/HsrCharacterToon"
         _EmissionIntensity ("Emission Intensity", Range(0, 100)) = 0
         _EmissionBaseColorMixing ("Base Color Emission Mixing", Range(0, 1)) = 0
 
-        [Header(Outline)]
+        [Header(Outline Setting)]
         [KeywordEnum(Off, On)]_Outline ("Outline Off/On", float) = 0
         [KeywordEnum(Fixed_Width, Fixed_Pixel, Dynamic_Width)]_OutlineType("Outline Width Control Type", float) = 0
         _OutlineWidth ("Outline Width or Pixel", float) = 0
@@ -60,9 +60,9 @@ Shader "Custom/HsrCharacterToon"
         _OutlineMaxWidth("Outline Max Width(Dynamic Only)", float) = 0
         _OutlineZBias ("Outline Z Bias", float) = 0
         // 鼻子描边
-        _NoseOutlineVofExponent("Nose Outline VoF Exponent", float) = 10
-        _NoseOutlineThreshold ("Nose Outline Threshold", range(0, 1)) = 0.125
-        _NoseOutlineSoftness("Nose Outline Softness", range(0,1)) = 0.125
+        [HideInInspector]_NoseOutlineVofExponent("Nose Outline VoF Exponent", float) = 10
+        [HideInInspector]_NoseOutlineThreshold ("Nose Outline Threshold", range(0, 1)) = 0.125
+        [HideInInspector]_NoseOutlineSoftness("Nose Outline Softness", range(0,1)) = 0.125
     }
     SubShader
     {
@@ -75,9 +75,8 @@ Shader "Custom/HsrCharacterToon"
             "Queue"="Geometry"
         }
         LOD 100
-        
         HLSLINCLUDE
-        #pragma shader_feature_local _ _AREA_BODY _AREA_FACE _AREA_HAIR
+        #pragma shader_feature_local _AREA_BODY _AREA_FACE _AREA_HAIR
         ENDHLSL
 
         Pass
@@ -144,8 +143,8 @@ Shader "Custom/HsrCharacterToon"
             #pragma target 2.0
             #pragma vertex Vert
             #pragma fragment Frag
-            #pragma shader_feature_local _ _OUTLINE_OFF _OUTLINE_ON
-            #pragma shader_feature_local _ _OUTLINETYPE_FIXED_WIDTH _OUTLINETYPE_FIXED_PIXEL _OUTLINETYPE_DYNAMIC_WIDTH
+            #pragma shader_feature_local _OUTLINE_OFF _OUTLINE_ON
+            #pragma shader_feature_local _OUTLINETYPE_FIXED_WIDTH _OUTLINETYPE_FIXED_PIXEL _OUTLINETYPE_DYNAMIC_WIDTH
             // -------------------------------------
             // Universal Pipeline keywords
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN

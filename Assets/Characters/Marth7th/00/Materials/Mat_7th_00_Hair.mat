@@ -50,7 +50,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 3000
   stringTagMap: {}
   disabledShaderPasses: []
   m_LockedProperties: 
@@ -79,7 +79,7 @@ Material:
     - _AmbientOcclusionIntensity: 0.5
     - _Area: 2
     - _BlendOp: 0
-    - _Cull: 0
+    - _Cull: 2
     - _DiffuseEyesMouthArea: 0.2
     - _DiffuseLightUpMinGary: 0.3
     - _DiffuseLightUpThresholdOffset: -0.25
@@ -92,23 +92,26 @@ Material:
     - _FlattenNormal: 1
     - _IndirectLightingBaseColorMixing: 0.4
     - _IndirectLightingIntensity: 1
+    - _Metallic: 1
     - _NoseOutlineColorGamma: 16
     - _NoseOutlineSoftness: 0.125
     - _NoseOutlineThreshold: 0.125
     - _NoseOutlineVofExponent: 10
     - _Outline: 1
-    - _OutlineMaxWidth: 2
-    - _OutlineMinWidth: 0.9
+    - _OutlineMaxWidth: 5
+    - _OutlineMinWidth: 2.5
     - _OutlineNormalChannel: 1
     - _OutlineNormalCompression: 1
     - _OutlineType: 2
-    - _OutlineWidth: 2
+    - _OutlineWidth: 3.5
     - _OutlineWidthScale: 0.0009
-    - _OutlineZBias: 2
+    - _OutlineZBias: 0
     - _RampHueType: 0
     - _SpecularExponent: 20
-    - _SpecularLightingIntensity: 3.2
+    - _SpecularLightingIntensity: 3
     - _SrcMode: 1
+    - _ZWrite: 0
+    - _Zwrite: 0
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}

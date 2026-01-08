@@ -28,8 +28,6 @@ Material:
   - _AREA_FACE
   - _EMISSIONTYPE_PARTLY
   - _EMISSION_OFF
-  - _OUTLINENORMALCHANNEL_NO
-  - _OUTLINENORMALCOMPRESSION_NO
   - _OUTLINETYPE_FIXED_WIDTH
   - _OUTLINE_OFF
   - _RAMPHUETYPE_WARM
@@ -39,7 +37,9 @@ Material:
   - _DYNAMICOUTLINE_ON
   - _EMISSION_ALL_AREA
   - _NORMAL_COMMON
+  - _OUTLINENORMALCHANNEL_NO
   - _OUTLINENORMALCOMPRESSED_NO
+  - _OUTLINENORMALCOMPRESSION_NO
   - _OUTLINENORMAL_CHANNEL_NO
   - _OUTLINENORMAL_COMPRESSED_NO
   - _OUTLINENORMAL_UV7_SMOOTH_NORMAL
@@ -50,7 +50,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 3000
+  m_CustomRenderQueue: 2999
   stringTagMap: {}
   disabledShaderPasses: []
   m_LockedProperties: 
@@ -92,6 +92,7 @@ Material:
     - _FlattenNormal: 1
     - _IndirectLightingBaseColorMixing: 0
     - _IndirectLightingIntensity: 0
+    - _Metallic: 1
     - _NoseOutlineColorGamma: 16
     - _NoseOutlineSoftness: 0.125
     - _NoseOutlineThreshold: 0.125
@@ -109,12 +110,14 @@ Material:
     - _SpecularExponent: 1
     - _SpecularLightingIntensity: 1
     - _SrcMode: 5
+    - _ZWrite: 0
     m_Colors:
     - _BaseColor: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
     - _HeadForwardVector: {r: 0, g: 0.0000007947286, b: 1, a: 0}
     - _HeadRightVector: {r: 1, g: 0, b: -0.000000024835268, a: 0}
     - _HeadUpVector: {r: -1.9737297e-14, g: 1, b: -0.0000007947286, a: 0}
+    - _NoseOutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 0}
     - _ShadowColor: {r: 0.83137256, g: 0.75686276, b: 0.77254903, a: 1}
     - _SpecularColor: {r: 0, g: 0, b: 0, a: 1}

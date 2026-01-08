@@ -4,7 +4,6 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 // #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/BRDF.hlsl"
 // #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/GlobalIllumination.hlsl"
-#include "HsrShaderFunction.hlsl"
 
 TEXTURE2D(_BaseMap);
 SAMPLER(sampler_BaseMap);
@@ -24,7 +23,6 @@ CBUFFER_START(UnityPerMaterial)
     //基础参数
     half4 _BaseColor;
     half4 _ShadowColor;
-    half4 _SpecularColor;
     half4 _OutlineColor;
     half4 _NoseOutlineColor;
     half _Alpha;
@@ -41,6 +39,7 @@ CBUFFER_START(UnityPerMaterial)
     float3 _HeadRightVector;
     float3 _HeadUpVector;
     //高光
+    float _Metallic;
     float _SpecularLightingIntensity;
     float _SpecularExponent;
     //环境光照
@@ -81,6 +80,15 @@ struct Varyings
     half3 SH : TEXCOORD4;
     float4 positionHCS : SV_POSITION;
 };
+
+//blinn-phong高光
+half3 BlinnPhongSpecular(float3 lightDirWS, float3 viewDirWS, float3 normalWS, half3 specularColor, float exponent)
+{
+    float3 h = normalize(lightDirWS + viewDirWS);
+    float3 h_dot_n = saturate(dot(h, normalWS));
+    float3 modifier = pow(h_dot_n, exponent);
+    return specularColor * modifier;
+}
 
 Varyings Vert(Attributes input)
 {
@@ -147,11 +155,13 @@ half4 Frag(Varyings input) : SV_Target
     // 高光计算
     half3 specularColor = 0;
     half3 specularResult = 0;
-    #if _AREA_BODY
-        specularColor = lerp(_SpecularColor.rgb, baseColor, lightMap.b);
-        specularResult = BlinnPhongSpecular(mainLightColor, mainLightDir, input.viewDirWS, input.normalWS, specularColor, _SpecularExponent);
+    #if _AREA_BODY  
+        specularColor = lerp(mainLightColor.rgb, baseColor, _Metallic);
+        specularColor = lerp(half3(0, 0, 0), specularColor, lightMap.b);
+        specularResult = BlinnPhongSpecular(mainLightDir, input.viewDirWS, input.normalWS, specularColor, _SpecularExponent);
     #elif _AREA_HAIR //非真实高光
-        specularColor = lerp(_SpecularColor.rgb, baseColor, lightMap.b);
+        
+        specularColor = lerp(half3(0, 0, 0), baseColor, lightMap.b);
         specularResult = lerp(half3(0, 0, 0), specularColor, diffuseLightUp);
     #endif
     // 自发光

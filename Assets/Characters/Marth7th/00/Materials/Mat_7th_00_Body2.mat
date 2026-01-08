@@ -83,7 +83,7 @@ Material:
     - _DiffuseEyesMouthArea: 0.2
     - _DiffuseLightUpMinGary: 0
     - _DiffuseLightUpThresholdOffset: 0
-    - _DiffuseLightUpThresholdSoftness: 0.01
+    - _DiffuseLightUpThresholdSoftness: 0.05
     - _DstMode: 0
     - _Emission: 1
     - _EmissionBaseColorMixing: 1
@@ -92,13 +92,14 @@ Material:
     - _FlattenNormal: 1
     - _IndirectLightingBaseColorMixing: 0.4
     - _IndirectLightingIntensity: 1
+    - _Metallic: 1
     - _NoseOutlineColorGamma: 16
     - _NoseOutlineSoftness: 0.125
     - _NoseOutlineThreshold: 0.125
     - _NoseOutlineVofExponent: 10
     - _Outline: 1
     - _OutlineMaxWidth: 2
-    - _OutlineMinWidth: 0.7
+    - _OutlineMinWidth: 1.2
     - _OutlineNormalChannel: 1
     - _OutlineNormalCompression: 1
     - _OutlineType: 2
@@ -107,8 +108,9 @@ Material:
     - _OutlineZBias: 0
     - _RampHueType: 0
     - _SpecularExponent: 20
-    - _SpecularLightingIntensity: 3
+    - _SpecularLightingIntensity: 8
     - _SrcMode: 1
+    - _ZWrite: 0
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}

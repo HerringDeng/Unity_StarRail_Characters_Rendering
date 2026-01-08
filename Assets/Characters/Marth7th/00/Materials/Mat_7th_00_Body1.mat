@@ -53,12 +53,24 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
-  m_LockedProperties: 
+  m_LockedProperties: _EmissionBaseColorMixing
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
         m_Texture: {fileID: 2800000, guid: 56de8428aa1da1440852f908a99d70c7, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMapTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _LightMapTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _RampMap_Cool:
@@ -69,6 +81,14 @@ Material:
         m_Texture: {fileID: 2800000, guid: 4b3ec5470b0f3674bb1f16b2e8e828e0, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _RampTex_cool:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RampTex_warm:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _SdfLightMap:
         m_Texture: {fileID: 2800000, guid: 49235ce0e5036d746a3d344ef249de1f, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -77,40 +97,64 @@ Material:
     m_Floats:
     - _Alpha: 1
     - _AmbientOcclusionIntensity: 0.5
+    - _Aphla: 1
     - _Area: 0
     - _BlendOp: 0
     - _Cull: 0
     - _DiffuseEyesMouthArea: 0.2
     - _DiffuseLightUpMinGary: 0
     - _DiffuseLightUpThresholdOffset: 0
-    - _DiffuseLightUpThresholdSoftness: 0.01
+    - _DiffuseLightUpThresholdSoftness: 0.05
     - _DstMode: 0
+    - _DynamicOutlineMaxWidth: 0
+    - _DynamicOutlineMinWidth: 0
     - _Emission: 1
     - _EmissionBaseColorMixing: 1
     - _EmissionIntensity: 0.1
+    - _EmissionMixBaseColorIntensity: 0
     - _EmissionType: 0
+    - _EnvironmentIntensity: 0
+    - _EnvironmentMixBaseIntensity: 0
     - _FlattenNormal: 1
     - _IndirectLightingBaseColorMixing: 0.4
     - _IndirectLightingIntensity: 1
+    - _MainLigthColorIntensity: 0
+    - _Metallic: 1
+    - _NoLMaxThreshold: 1
     - _NoseOutlineColorGamma: 16
     - _NoseOutlineSoftness: 0.125
     - _NoseOutlineThreshold: 0.125
     - _NoseOutlineVofExponent: 10
+    - _NoseShadowDarkness: 0.6
+    - _NoseShadowGamma: 16
+    - _NoseShadowPow: 10
+    - _NoseShadowSoftness: 0
+    - _NoseShadowThreshold: 0
     - _Outline: 1
     - _OutlineMaxWidth: 2
-    - _OutlineMinWidth: 0.7
+    - _OutlineMinWidth: 1.2
     - _OutlineNormalChannel: 1
     - _OutlineNormalCompression: 1
+    - _OutlineNormal_Channel: 0
+    - _OutlineNormal_Compressed: 0
     - _OutlineType: 2
     - _OutlineWidth: 2
     - _OutlineWidthScale: 0.0009
     - _OutlineZBias: 0
+    - _RampDarkCenter: 0
+    - _RampDarkSoftness: 0
     - _RampHueType: 0
+    - _RampType: 0
     - _SpecularExponent: 20
-    - _SpecularLightingIntensity: 3
+    - _SpecularIntensity: 1
+    - _SpecularLightingIntensity: 8
+    - _SpecularSmoothness: 1
     - _SrcMode: 1
+    - _UsingEmisionMap: 0
+    - _ZWrite: 0
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _DarkColor: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
     - _HeadForwardVector: {r: 0, g: 0.0000007947286, b: 1, a: 0}
     - _HeadRightVector: {r: 1, g: 0, b: -0.000000024835268, a: 0}

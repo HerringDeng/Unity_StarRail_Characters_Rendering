@@ -15,12 +15,12 @@ half3 desaturation(half3 color, half3 glayXfer = half3(0.3, 0.59, 0.11))
 }
 
 //blinn-phong高光
-half3 BlinnPhongSpecular(half3 lightColor, float3 lightDirWS, float3 viewDirWS, float3 normalWS, half3 specularColor, float exponent)
+half3 BlinnPhongSpecular(float3 lightDirWS, float3 viewDirWS, float3 normalWS, half3 specularColor, float exponent)
 {
     float3 h = normalize(lightDirWS + viewDirWS);
     float3 h_dot_n = saturate(dot(h, normalWS));
     float3 modifier = pow(h_dot_n, exponent);
-    return lightColor * specularColor * modifier;
+    return specularColor * modifier;
 }
 
 //混合颜色
