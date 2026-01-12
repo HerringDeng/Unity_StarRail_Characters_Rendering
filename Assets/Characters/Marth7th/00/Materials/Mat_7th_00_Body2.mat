@@ -21,7 +21,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Mat_7th_00_Body2
-  m_Shader: {fileID: 4800000, guid: eb38ee1d96364ec4ea7d7314127dad47, type: 3}
+  m_Shader: {fileID: 4800000, guid: 813d5dc1310cc9f47998a4858c4e593c, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
@@ -98,12 +98,14 @@ Material:
     - _NoseOutlineThreshold: 0.125
     - _NoseOutlineVofExponent: 10
     - _Outline: 1
+    - _OutlineCameraStandardDistance: 1.5
     - _OutlineMaxWidth: 2
     - _OutlineMinWidth: 1.2
     - _OutlineNormalChannel: 1
     - _OutlineNormalCompression: 1
     - _OutlineType: 2
-    - _OutlineWidth: 2
+    - _OutlineWidth: 6
+    - _OutlineWidthRangeOffset: 2
     - _OutlineWidthScale: 0.0009
     - _OutlineZBias: 0
     - _RampHueType: 0

@@ -20,12 +20,12 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Mat_7th_00_Hair
+  m_Name: Mat_7th_00_Weapon
   m_Shader: {fileID: 4800000, guid: eb38ee1d96364ec4ea7d7314127dad47, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
-  - _AREA_HAIR
+  - _AREA_BODY
   - _EMISSIONTYPE_PARTLY
   - _EMISSION_ON
   - _OUTLINETYPE_DYNAMIC_WIDTH
@@ -50,7 +50,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 3000
+  m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
   m_LockedProperties: 
@@ -58,36 +58,36 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 244acc82b139f8b49b51da80504e75c2, type: 3}
+        m_Texture: {fileID: 2800000, guid: 0348a449c6768eb4c9cdddb305490465, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _RampMap_Cool:
-        m_Texture: {fileID: 2800000, guid: 6cecdcbe4c1f38d4f863b16609b4274a, type: 3}
+        m_Texture: {fileID: 2800000, guid: d5cd557becfa3704a99b7c7bb492ed11, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _RampMap_Warm:
-        m_Texture: {fileID: 2800000, guid: e94a7d81ddaa78147a2c5518f4326121, type: 3}
+        m_Texture: {fileID: 2800000, guid: 4b3ec5470b0f3674bb1f16b2e8e828e0, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SdfLightMap:
-        m_Texture: {fileID: 2800000, guid: fa2846fedb080934e9d54ed906c40311, type: 3}
+        m_Texture: {fileID: 2800000, guid: 814a220bbeec5c14fa7318063ea13e4d, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _Alpha: 1
     - _AmbientOcclusionIntensity: 0.5
-    - _Area: 2
+    - _Area: 0
     - _BlendOp: 0
-    - _Cull: 2
+    - _Cull: 0
     - _DiffuseEyesMouthArea: 0.2
-    - _DiffuseLightUpMinGary: 0.3
-    - _DiffuseLightUpThresholdOffset: -0.25
-    - _DiffuseLightUpThresholdSoftness: 0.15
+    - _DiffuseLightUpMinGary: 0
+    - _DiffuseLightUpThresholdOffset: 0
+    - _DiffuseLightUpThresholdSoftness: 0.05
     - _DstMode: 0
     - _Emission: 1
     - _EmissionBaseColorMixing: 1
-    - _EmissionIntensity: 0.05
+    - _EmissionIntensity: 0.1
     - _EmissionType: 0
     - _FlattenNormal: 1
     - _IndirectLightingBaseColorMixing: 0.4
@@ -98,20 +98,19 @@ Material:
     - _NoseOutlineThreshold: 0.125
     - _NoseOutlineVofExponent: 10
     - _Outline: 1
-    - _OutlineMaxWidth: 5
-    - _OutlineMinWidth: 2.5
+    - _OutlineMaxWidth: 2
+    - _OutlineMinWidth: 1.2
     - _OutlineNormalChannel: 1
     - _OutlineNormalCompression: 1
     - _OutlineType: 2
-    - _OutlineWidth: 3
+    - _OutlineWidth: 2
     - _OutlineWidthScale: 0.0009
-    - _OutlineZBias: 1
+    - _OutlineZBias: 0
     - _RampHueType: 0
     - _SpecularExponent: 20
-    - _SpecularLightingIntensity: 3
+    - _SpecularLightingIntensity: 8
     - _SrcMode: 1
     - _ZWrite: 0
-    - _Zwrite: 0
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
@@ -119,7 +118,7 @@ Material:
     - _HeadRightVector: {r: 1, g: 0, b: -0.000000024835268, a: 0}
     - _HeadUpVector: {r: -1.9737297e-14, g: 1, b: -0.0000007947286, a: 0}
     - _NoseOutlineColor: {r: 0, g: 0, b: 0, a: 1}
-    - _OutlineColor: {r: 0.43529412, g: 0.1764706, b: 0.18431373, a: 1}
+    - _OutlineColor: {r: 0, g: 0, b: 0, a: 0}
     - _ShadowColor: {r: 0.83137256, g: 0.75686276, b: 0.77254903, a: 1}
     - _SpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
