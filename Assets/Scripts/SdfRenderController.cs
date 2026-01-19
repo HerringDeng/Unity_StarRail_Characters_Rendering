@@ -4,15 +4,15 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 [ExecuteInEditMode]
-public class SentPropToShader : MonoBehaviour
+public class SdfRenderController : MonoBehaviour
 {
     public Transform headCenter;
     public Transform headForward;
     public Transform headRight;
     private Renderer[] allRenderers;
-    private int headForwardID = Shader.PropertyToID("_HeadForwardVector");
-    private int headRightID = Shader.PropertyToID("_HeadRightVector");
-        private int headUpID = Shader.PropertyToID("_HeadUpVector");
+    private int headForwardID = Shader.PropertyToID("_HeadForwardVectorWS");
+    private int headRightID = Shader.PropertyToID("_HeadRightVectorWS");
+    private int headUpID = Shader.PropertyToID("_HeadUpVectorWS");
 
     void LateUpdate()
     {

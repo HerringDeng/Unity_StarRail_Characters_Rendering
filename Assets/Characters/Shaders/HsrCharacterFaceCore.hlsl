@@ -24,19 +24,20 @@ CBUFFER_START(UnityPerMaterial)
     half4 _BaseColor;
     half4 _ShadowColor;
     half4 _OutlineColor;
+    half4 _NoseOutlineColor;
     half _Alpha;
+    half _AlphaCutOff;
     float _SrcMode;
     float _DstMode;
     float _BlendOp;
     //漫反射
     float _DiffuseLightUpMinGary;
-    float _DiffuseEyesMouthArea;
     float _DiffuseLightUpThresholdOffset;
     float _DiffuseLightUpThresholdSoftness;
     // SDF辅助方位
-    float3 _HeadForwardVector;
-    float3 _HeadRightVector;
-    float3 _HeadUpVector;
+    float3 _HeadForwardVectorWS;
+    float3 _HeadRightVectorWS;
+    float3 _HeadUpVectorWS;
     //高光
     float _Metallic;
     float _SpecularLightingIntensity;
@@ -55,6 +56,10 @@ CBUFFER_START(UnityPerMaterial)
     float _OutlineZBias;
     float _OutlineWidthRangeOffset;
     float _OutlineCameraStandardDistance;
+    //鼻子描边
+    float _NoseOutlineFoVExponent;
+    float _NoseOutlineThreshold;
+    float _NoseOutlineSoftness;
 CBUFFER_END
 
 struct ForwardAttributes
@@ -93,7 +98,7 @@ ForwardVaryings ForwardVert(ForwardAttributes input)
     output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
     output.positionWSAndFogFactor = float4(vertexInput.positionWS, ComputeFogFactor(vertexInput.positionCS.z));
     output.normalWS = vertexNormalInput.normalWS;
-    output.viewDirWS = unity_OrthoParams.w == 0 ? GetCameraPositionWS() - vertexInput.positionWS : GetWorldToViewMatrix()[2].xyz;  // 区分透视相机和正交相机
+    output.viewDirWS = normalize(unity_OrthoParams.w == 0 ? GetCameraPositionWS() - vertexInput.positionWS : GetWorldToViewMatrix()[2].xyz);  // 区分透视相机和正交相机
     output.SH = SampleSH(lerp(vertexNormalInput.normalWS, float3(0, 0, 0), _FlattenNormal));
     return output;
 }
@@ -117,28 +122,30 @@ half4 ForwardFrag(ForwardVaryings input) : SV_Target
     // 漫反射
     half diffuseLightUp = 0;
     half3 diffuseLightingResult = 0;
-    float2 rampUV = 0;
-    half NoL = saturate(dot(input.normalWS, mainLightDir));
-    NoL = min(NoL, 1-_DiffuseLightUpMinGary);
-    half diffuseLightUpThreshold = 1-lightMap.g; 
-    diffuseLightUp = smoothstep(diffuseLightUpThreshold + _DiffuseLightUpThresholdOffset - _DiffuseLightUpThresholdSoftness, diffuseLightUpThreshold + _DiffuseLightUpThresholdOffset + _DiffuseLightUpThresholdSoftness, NoL);
+    float3 flattenLightDir = normalize(mainLightDir - dot(mainLightDir, _HeadUpVectorWS) * _HeadUpVectorWS);
+    float RoL = dot(_HeadRightVectorWS, flattenLightDir);
+    float2 sdfUV = float2(-sign(RoL), 1) * input.uv;
+    half diffuseLightUpThreshold = 1 - SAMPLE_TEXTURE2D(_SdfLightMap, sampler_SdfLightMap, sdfUV).a;
+    half FoL = saturate(dot(_HeadForwardVectorWS, flattenLightDir));
+    FoL = min(FoL, 1 - _DiffuseLightUpMinGary);
+    diffuseLightUp = smoothstep(diffuseLightUpThreshold + _DiffuseLightUpThresholdOffset -_DiffuseLightUpThresholdSoftness, diffuseLightUpThreshold + _DiffuseLightUpThresholdOffset +_DiffuseLightUpThresholdSoftness, FoL);
+    diffuseLightUp = lerp(diffuseLightUp, 1, step(0.2, lightMap.r)); // 眼睛和嘴巴区域始终高亮
     half3 baseShadowColor = lerp(_ShadowColor.rgb, half3(1, 1, 1), diffuseLightUp);
-    half3 rampColor = 0;
-    rampUV.y = lightMap.a;
+    float2 rampUV = 0;
     rampUV.x = diffuseLightUp;
+    rampUV.y = 0.05;
+    half3 rampColor = 0;
     #if _RAMPHUETYPE_WARM
         rampColor = SAMPLE_TEXTURE2D(_RampMap_Warm, sampler_RampMap_Warm, rampUV).rgb;
-    #elif _RAMPHUETYPE_COOL
+    #endif
+    #if _RAMPHUETYPE_COOL
         rampColor = SAMPLE_TEXTURE2D(_RampMap_Cool, sampler_RampMap_Cool, rampUV).rgb;
     #endif
     diffuseLightingResult = mainLightColor * baseColor * baseShadowColor * rampColor;
 
     // 高光计算
-    half3 specularColor = 0;
     half3 specularResult = 0;
-    specularColor = lerp(mainLightColor.rgb, baseColor, _Metallic);
-    specularColor = lerp(half3(0, 0, 0), specularColor, lightMap.b);
-    specularResult = BlinnPhongSpecular(mainLightDir, input.viewDirWS, input.normalWS, specularColor, _SpecularExponent);
+    // 脸部无高光
 
     // 自发光
     half3 emissionResult = 0;
@@ -150,17 +157,41 @@ half4 ForwardFrag(ForwardVaryings input) : SV_Target
         half3 emissionColor = lerp(_EmissionColor.rgb, baseColor, _EmissionBaseColorMixing); //与基础色混合
         emissionResult = lerp(half3(0, 0, 0), emissionColor, emission_area);
     #endif
+    //鼻影
+    // half noseOutlineIntensity = 0;
+    half3 noseOutlineColor = _NoseOutlineColor.rgb;
+    // half3 cameraForward = TransformViewToWorld(half3(0, 0, 1));
+    half FoV = pow(abs(dot(_HeadForwardVectorWS, input.viewDirWS)), _NoseOutlineFoVExponent);
+    float noseOutlineIntensity = 1.0 + _NoseOutlineThreshold - lightMap.b;
+    noseOutlineColor = lerp(half3(1,1,1),  _NoseOutlineColor.rgb, smoothstep(noseOutlineIntensity, noseOutlineIntensity+_NoseOutlineSoftness, FoV));
     
     // 最终输出颜色
     half3 albedo = diffuseLightingResult + diffuseLightingResult*IndirectLightingResult * _IndirectLightingIntensity; //基础色
     albedo += specularResult * _SpecularLightingIntensity;
     albedo += emissionResult * _EmissionIntensity; //自发光
-    half4 final = half4(albedo, alpha); // Forward Rendering Result
+    albedo *= noseOutlineColor;
+    half4 final = half4(albedo, alpha);
+    // Alpha Cut Off
+    clip(final.a - _AlphaCutOff);
     return final;
 }
 
-#include "HsrOutline.hlsl"
+half4 EyesMaskFrag(ForwardVaryings input) : SV_Target
+{
+    half4 lightMap = SAMPLE_TEXTURE2D(_SdfLightMap, sampler_SdfLightMap, input.uv);
+    if(lightMap.r < 0.2)
+    {
+        clip(-1);
+        return 0;
+    }
+    else
+    {    
+        half4 final = ForwardFrag(input);
+        return final;
+    }
+}
 
+#include "HsrOutline.hlsl"
 OutlineVaryings OutlineVert(OutlineAttributes input)
 {
     OutlineVaryings output;
@@ -168,6 +199,10 @@ OutlineVaryings OutlineVert(OutlineAttributes input)
     #if _OUTLINE_ON
         OutlineData data;
         data.outlineWidth = _OutlineWidth;
+        VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS);
+        float3 viewDirWS = normalize(GetWorldSpaceViewDir(vertexInput.positionWS));
+        float FoV = pow(max(0, dot(_HeadForwardVectorWS, viewDirWS)), 0.8);
+        data.outlineWidth *= smoothstep(-0.02, 0, 1 - FoV - input.color.b);
         data.outlineZBias = _OutlineZBias;
         data.outlineWidthRangeOffset = _OutlineWidthRangeOffset;
         data.outlineStandardCameraDistance = _OutlineCameraStandardDistance;
@@ -185,11 +220,15 @@ OutlineVaryings OutlineVert(OutlineAttributes input)
 
 half4 OutlineFrag(OutlineVaryings input) : SV_Target
 {
+    half4 final = 0;
     #if _OUTLINE_OFF
         clip(-1);
-        return 0;
-    #else
-        return _OutlineColor;
+    #elif _OUTLINE_ON
+        final = _OutlineColor;
+        clip(final.a - _AlphaCutOff);
     #endif
+    return final;
 }
+
+
 #endif

@@ -1,8 +1,7 @@
-Shader "Custom/HsrCharacterToon"
+Shader "HsrCharacter/HsrCharacterBody"
 {
     Properties
     {
-        [KeywordEnum(Body, Face, Hair)]_Area ("Material Area", float) = 0
         [Header(Texture Setting)]
         [MainTexture] _BaseMap ("Base Map", 2D) = "white" { }
         _SdfLightMap ("Light Map", 2D) = "while" { }
@@ -13,10 +12,10 @@ Shader "Custom/HsrCharacterToon"
         [MainColor] _BaseColor ("Color", Color) = (1, 1, 1, 1)
         _ShadowColor ("Shadow Color", Color) = (0, 0, 0, 1)
         _OutlineColor ("Outline Color", Color) = (0, 0, 0, 1)
-        _NoseOutlineColor("Nose Outline Color", Color) = (0, 0, 0, 1)
 
         [Header(Alpha Blending Setting)]
         _Alpha ("Alpha", Range(0, 1)) = 1.0
+        _AlphaCutOff ("Alpha Cut Off", Range(0, 1)) = 0
         [Enum(UnityEngine.Rendering.BlendMode)]_SrcMode ("SrcMode", float) = 0
         [Enum(UnityEngine.Rendering.BlendMode)]_DstMode ("DstMode", float) = 0
         [Enum(UnityEngine.Rendering.BlendOp)]_BlendOp ("BlendOp", float) = 0
@@ -28,10 +27,6 @@ Shader "Custom/HsrCharacterToon"
         _DiffuseLightUpThresholdOffset("Diffuse Light-up Threshold Offset", range(-1, 1)) = 0
         _DiffuseLightUpThresholdSoftness ("DiffuseLightUpThreshold Softness", range(0, 1)) = 0
         [KeywordEnum(Warm, Cool)]_RampHueType ("Using Rampmap Texture Hue Type", float) = 0
-        // SDF辅助方位
-        [HideInInspector]_HeadForwardVector ("Head Forward Vector", vector) = (0, 0, 1)
-        [HideInInspector]_HeadRightVector ("Head Right Vector", vector) = (-1, 0, 0)
-        [HideInInspector]_HeadUpVector ("Head Up Vector", vector) = (0, 1, 0)
 
         [Header(Environment Lighting Setting)]
         _IndirectLightingIntensity ("Indirect Lighting Intensity", Range(0, 1)) = 0
@@ -55,14 +50,9 @@ Shader "Custom/HsrCharacterToon"
         [KeywordEnum(Off, On)]_Outline ("Outline Off/On", float) = 0
         [KeywordEnum(Fixed_Width, Fixed_Pixel, Dynamic_Width)]_OutlineType("Outline Width Control Type", float) = 0
         _OutlineWidth ("Outline Width or Pixel", float) = 0
-        [HideInInspector]_OutlineWidthScale("Outline Width Scale(Pixel Invalid)", float) = 0.0009
-        _OutlineMinWidth("Outline Min Width(Dynamic Only)", float) = 0
-        _OutlineMaxWidth("Outline Max Width(Dynamic Only)", float) = 0
         _OutlineZBias ("Outline Z Bias", float) = 0
-        // 鼻子描边
-        [HideInInspector]_NoseOutlineVofExponent("Nose Outline VoF Exponent", float) = 10
-        [HideInInspector]_NoseOutlineThreshold ("Nose Outline Threshold", range(0, 1)) = 0.125
-        [HideInInspector]_NoseOutlineSoftness("Nose Outline Softness", range(0,1)) = 0.125
+        _OutlineWidthRangeOffset("Outline Width Range Offset(Dynamic Only)", float) = 0
+        _OutlineCameraStandardDistance("Outline Camera Standard Distance(Dynamic Only)", float) = 0
     }
     SubShader
     {
@@ -72,7 +62,6 @@ Shader "Custom/HsrCharacterToon"
             "RenderType" = "Opaque"
             "IgnoreProjector" = "True"
             "UniversalMaterialType" = "ComplexLit"
-            "Queue"="Geometry"
         }
         LOD 100
         HLSLINCLUDE
@@ -84,7 +73,15 @@ Shader "Custom/HsrCharacterToon"
             Name "ForwardLit"
             Tags
             {
-                "LightMode" = "UniversalForwardOnly"
+                "LightMode" = "SRPDefaultUnlit"
+            }
+            Stencil
+            {
+                Ref 1
+                WriteMask 1
+                Comp Always
+                Pass Replace
+                Fail Keep
             }
             Blend[_SrcMode][_DstMode]
             BlendOp[_BlendOp]
@@ -94,11 +91,11 @@ Shader "Custom/HsrCharacterToon"
             
             HLSLPROGRAM
             #pragma target 2.0
-            #pragma vertex Vert
-            #pragma fragment Frag
-            #pragma multi_compile _ _RAMPHUETYPE_WARM _RAMPHUETYPE_COOL
-            #pragma multi_compile _ _EMISSION_OFF _EMISSION_ON
-            #pragma multi_compile _ _EMISSIONTYPE_PARTLY _EMISSIONTYPE_WHOLE
+            #pragma vertex ForwardVert // Vertex Shader
+            #pragma fragment ForwardFrag // Fragment Shader
+            #pragma multi_compile _RAMPHUETYPE_WARM _RAMPHUETYPE_COOL
+            #pragma multi_compile _EMISSION_OFF _EMISSION_ON
+            #pragma multi_compile _EMISSIONTYPE_PARTLY _EMISSIONTYPE_WHOLE
             // -------------------------------------
             // Universal Pipeline keywords
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
@@ -132,17 +129,31 @@ Shader "Custom/HsrCharacterToon"
             #pragma instancing_options renderinglayer
             #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
             
-            #include"HsrForwardLitPass.hlsl"
+            #include"HsrCharacterBodyCore.hlsl"
             ENDHLSL
         }
         Pass
         {
             Name "Outline"
+            Tags
+            {
+                "LightMode" = "UniversalForward"
+            }
+            Stencil
+            {
+                Ref 1
+                WriteMask 1
+                Comp Always
+                Pass Replace
+                Fail Keep
+            }
             Cull Front
+            ZWrite On
+            ZTest LEqual
             HLSLPROGRAM
             #pragma target 2.0
-            #pragma vertex Vert
-            #pragma fragment Frag
+            #pragma vertex OutlineVert
+            #pragma fragment OutlineFrag
             #pragma shader_feature_local _OUTLINE_OFF _OUTLINE_ON
             #pragma shader_feature_local _OUTLINETYPE_FIXED_WIDTH _OUTLINETYPE_FIXED_PIXEL _OUTLINETYPE_DYNAMIC_WIDTH
             // -------------------------------------
@@ -179,7 +190,7 @@ Shader "Custom/HsrCharacterToon"
             #pragma instancing_options renderinglayer
             #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
 
-            #include "HsrOutlinePass.hlsl"
+            #include "HsrCharacterBodyCore.hlsl"
             ENDHLSL
         }
     }

@@ -1,4 +1,4 @@
-Shader "Custom/HSR_Character_Shader"
+Shader "Deprecation/HSR_Character_Shader"
 {
     Properties
     {

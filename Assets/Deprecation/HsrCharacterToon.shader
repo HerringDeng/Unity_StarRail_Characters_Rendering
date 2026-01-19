@@ -1,4 +1,4 @@
-Shader "Custom/HsrCharacterBody"
+Shader "Deprecation/HsrCharacterToon"
 {
     Properties
     {
@@ -13,6 +13,7 @@ Shader "Custom/HsrCharacterBody"
         [MainColor] _BaseColor ("Color", Color) = (1, 1, 1, 1)
         _ShadowColor ("Shadow Color", Color) = (0, 0, 0, 1)
         _OutlineColor ("Outline Color", Color) = (0, 0, 0, 1)
+        _NoseOutlineColor("Nose Outline Color", Color) = (0, 0, 0, 1)
 
         [Header(Alpha Blending Setting)]
         _Alpha ("Alpha", Range(0, 1)) = 1.0
@@ -54,9 +55,14 @@ Shader "Custom/HsrCharacterBody"
         [KeywordEnum(Off, On)]_Outline ("Outline Off/On", float) = 0
         [KeywordEnum(Fixed_Width, Fixed_Pixel, Dynamic_Width)]_OutlineType("Outline Width Control Type", float) = 0
         _OutlineWidth ("Outline Width or Pixel", float) = 0
+        [HideInInspector]_OutlineWidthScale("Outline Width Scale(Pixel Invalid)", float) = 0.0009
+        _OutlineMinWidth("Outline Min Width(Dynamic Only)", float) = 0
+        _OutlineMaxWidth("Outline Max Width(Dynamic Only)", float) = 0
         _OutlineZBias ("Outline Z Bias", float) = 0
-        _OutlineWidthRangeOffset("Outline Width Range Offset(Dynamic Only)", float) = 0
-        _OutlineCameraStandardDistance("Outline Camera Standard Distance(Dynamic Only)", float) = 0
+        // 鼻子描边
+        [HideInInspector]_NoseOutlineVofExponent("Nose Outline VoF Exponent", float) = 10
+        [HideInInspector]_NoseOutlineThreshold ("Nose Outline Threshold", range(0, 1)) = 0.125
+        [HideInInspector]_NoseOutlineSoftness("Nose Outline Softness", range(0,1)) = 0.125
     }
     SubShader
     {
@@ -88,11 +94,11 @@ Shader "Custom/HsrCharacterBody"
             
             HLSLPROGRAM
             #pragma target 2.0
-            #pragma vertex ForwardVert // Vertex Shader
-            #pragma fragment ForwardFrag // Fragment Shader
-            #pragma multi_compile _RAMPHUETYPE_WARM _RAMPHUETYPE_COOL
-            #pragma multi_compile _EMISSION_OFF _EMISSION_ON
-            #pragma multi_compile _EMISSIONTYPE_PARTLY _EMISSIONTYPE_WHOLE
+            #pragma vertex Vert
+            #pragma fragment Frag
+            #pragma multi_compile _ _RAMPHUETYPE_WARM _RAMPHUETYPE_COOL
+            #pragma multi_compile _ _EMISSION_OFF _EMISSION_ON
+            #pragma multi_compile _ _EMISSIONTYPE_PARTLY _EMISSIONTYPE_WHOLE
             // -------------------------------------
             // Universal Pipeline keywords
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
@@ -126,7 +132,7 @@ Shader "Custom/HsrCharacterBody"
             #pragma instancing_options renderinglayer
             #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
             
-            #include"HsrCharacterBodyCore.hlsl"
+            #include"HsrForwardLitPass.hlsl"
             ENDHLSL
         }
         Pass
@@ -135,8 +141,8 @@ Shader "Custom/HsrCharacterBody"
             Cull Front
             HLSLPROGRAM
             #pragma target 2.0
-            #pragma vertex OutlineVert
-            #pragma fragment OutlineFrag
+            #pragma vertex Vert
+            #pragma fragment Frag
             #pragma shader_feature_local _OUTLINE_OFF _OUTLINE_ON
             #pragma shader_feature_local _OUTLINETYPE_FIXED_WIDTH _OUTLINETYPE_FIXED_PIXEL _OUTLINETYPE_DYNAMIC_WIDTH
             // -------------------------------------
@@ -173,7 +179,7 @@ Shader "Custom/HsrCharacterBody"
             #pragma instancing_options renderinglayer
             #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
 
-            #include "HsrCharacterBodyCore.hlsl"
+            #include "HsrOutlinePass.hlsl"
             ENDHLSL
         }
     }

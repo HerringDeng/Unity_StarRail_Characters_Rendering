@@ -96,6 +96,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _Alpha: 1
+    - _AlphaCutOff: 0
     - _AmbientOcclusionIntensity: 0.5
     - _Aphla: 1
     - _Area: 0
@@ -162,7 +163,7 @@ Material:
     - _HeadRightVector: {r: 1, g: 0, b: -0.000000024835268, a: 0}
     - _HeadUpVector: {r: -1.9737297e-14, g: 1, b: -0.0000007947286, a: 0}
     - _NoseOutlineColor: {r: 0, g: 0, b: 0, a: 1}
-    - _OutlineColor: {r: 0, g: 0, b: 0, a: 0}
+    - _OutlineColor: {r: 0.222, g: 0.11569014, b: 0.11569014, a: 1}
     - _ShadowColor: {r: 0.83137256, g: 0.75686276, b: 0.77254903, a: 1}
     - _SpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
