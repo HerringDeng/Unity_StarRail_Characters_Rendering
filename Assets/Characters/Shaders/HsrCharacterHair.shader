@@ -22,13 +22,22 @@ Shader "HsrCharacter/HsrCharacterHair"
         [Enum(UnityEngine.Rendering.BlendOp)]_BlendOp ("BlendOp", float) = 0
         [Enum(UnityEngine.Rendering.CullMode)]_Cull ("Cull", float) = 0
 
+        [Header(Shadow Setting)]
+        [Toggle]_Cast_Shadows ("Cast Shadows", Float) = 1
+        [Toggle]_Receive_Shadows ("Receive Shadows", Float) = 1
+        _ShadowIntensity ("Shadow Intensity", Range(0, 1)) = 1.0
+        _ShadowDepthBias( "Shadow Depth Bias", Range(-1, 1)) = 0.1
+        _ShadowNormalBias( "Shadow Normal Bias", Range(-1, 1)) = 0.1
+        // _HairFakeShadowHorizontalBias("Hair Fake Shadow Horizontal Bias", Range(-1, 1)) = 0
+        // _HairFakeShadowVerticalBias("Hair Fake Shadow Vertical Bias", Range(-1, 1)) = 0
+        // _HairFakeShadowExtend("Hair Fake Shadow Extend", Range(-1, 1)) = 0
+
         [Header(Diffuse Lighting Setting)]
         _DiffuseLightUpMinGary("Diffuse Minimum Light-up Gary", Range(0, 1)) = 0
         [HideInInspector]_DiffuseEyesMouthArea("Diffuse Eyes and Mouth Area will be Always Light-up", Range(0, 1)) = 0.2
         _DiffuseLightUpThresholdOffset("Diffuse Light-up Threshold Offset", range(-1, 1)) = 0
         _DiffuseLightUpThresholdSoftness ("DiffuseLightUpThreshold Softness", range(0, 1)) = 0
         [KeywordEnum(Warm, Cool)]_RampHueType ("Using Rampmap Texture Hue Type", float) = 0
-
         [Header(Environment Lighting Setting)]
         _IndirectLightingIntensity ("Indirect Lighting Intensity", Range(0, 1)) = 0
         [HideInInspector]_FlattenNormal ("Flatten Normal", Range(0, 1)) = 1
@@ -66,7 +75,7 @@ Shader "HsrCharacter/HsrCharacterHair"
         }
         LOD 100
         HLSLINCLUDE
-        #pragma shader_feature_local _AREA_BODY _AREA_FACE _AREA_HAIR
+        #define _AREA_HAIR
         ENDHLSL
 
         Pass
@@ -78,9 +87,9 @@ Shader "HsrCharacter/HsrCharacterHair"
             }
             Stencil
             {
-                Ref 3
-                ReadMask 2
-                WriteMask 1
+                Ref 13
+                ReadMask 4
+                WriteMask 9
                 Comp NotEqual
                 Pass Replace
                 Fail Keep
@@ -98,6 +107,7 @@ Shader "HsrCharacter/HsrCharacterHair"
             #pragma multi_compile _RAMPHUETYPE_WARM _RAMPHUETYPE_COOL
             #pragma multi_compile _EMISSION_OFF _EMISSION_ON
             #pragma multi_compile _EMISSIONTYPE_PARTLY _EMISSIONTYPE_WHOLE
+            #pragma multi_compile _ _RECEIVE_SHADOWS_ON
             // -------------------------------------
             // Universal Pipeline keywords
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
@@ -131,27 +141,27 @@ Shader "HsrCharacter/HsrCharacterHair"
             #pragma instancing_options renderinglayer
             #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
             
-            #include"HsrCharacterHairCore.hlsl"
+            #include "HsrCharacterShaderCore.hlsl"
             ENDHLSL
         }
         Pass
         {
-            Name "ForwardLit"
+            Name "HairTransparent"
             Tags
             {
                 "LightMode" = "SRPDefaultUnlit"
             }
             Stencil
             {
-                Ref 7
-                ReadMask 2
-                WriteMask 5
+                Ref 13
+                ReadMask 4
+                WriteMask 9
                 Comp Equal
                 Pass Replace
                 Fail Keep
             }
-            Blend[_SrcMode][_DstMode]
-            BlendOp[_BlendOp]
+            Blend SrcAlpha OneMinusSrcAlpha
+            BlendOp Add
             Cull Off
             ZWrite On
             ZTest LEqual
@@ -196,7 +206,7 @@ Shader "HsrCharacter/HsrCharacterHair"
             #pragma instancing_options renderinglayer
             #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
             
-            #include"HsrCharacterHairCore.hlsl"
+            #include "HsrCharacterShaderCore.hlsl"
             ENDHLSL
         }
         Pass
@@ -257,7 +267,123 @@ Shader "HsrCharacter/HsrCharacterHair"
             #pragma instancing_options renderinglayer
             #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
 
-            #include "HsrCharacterHairCore.hlsl"
+            #include "HsrCharacterShaderCore.hlsl"
+            ENDHLSL
+        }
+        Pass
+        {
+            Name "DepthOnly"
+            Tags
+            {
+                "LightMode" = "DepthOnly"
+            }
+
+            // -------------------------------------
+            // Render State Commands
+            // - more explicit render state to avoid confusion
+            ZWrite On // the only goal of this pass is to write depth!
+            ZTest LEqual // early exit at Early-Z stage if possible            
+            ColorMask R // we don't care about RGB color, we just want to write depth, ColorMask R will save some write bandwidth
+            Cull Off 
+            
+            HLSLPROGRAM
+            #pragma target 2.0
+            // -------------------------------------
+            // Shader Stages
+            #pragma vertex OutlineVert
+            #pragma fragment DepthOnlyFrag // we only need to do Clip(), no need color shading
+            // -------------------------------------
+            // Material Keywords
+            #pragma shader_feature_local _USEALPHACLIPPING // enable _UseAlphaClipping keyword support
+            // -------------------------------------
+            // Unity defined keywords
+            #pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
+            //--------------------------------------
+            // GPU Instancing
+            #pragma multi_compile_instancing
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+            // -------------------------------------
+            // Includes
+            // - all shader logic written inside this .hlsl, remember to write all #define BEFORE writing #include
+            #include "HsrCharacterShaderCore.hlsl"
+
+            ENDHLSL
+        }
+        Pass
+        {
+            Name "DepthNormalsOnly"
+            Tags
+            {
+                "LightMode" = "DepthNormalsOnly"
+            }
+
+            // -------------------------------------
+            // Render State Commands
+            // - more explicit render state to avoid confusion
+            ZWrite On // the only goal of this pass is to write depth!
+            ZTest LEqual // early exit at Early-Z stage if possible            
+            ColorMask RGBA // we want to draw normal as rgb color!
+            Cull Off
+
+            HLSLPROGRAM
+            #pragma target 2.0
+
+            // -------------------------------------
+            // Shader Stages
+            #pragma vertex ForwardVert
+            #pragma fragment DepthNormalsFrag // we only need to do Clip() + normal as rgb color shading
+            
+            // -------------------------------------
+            // Material Keywords
+            #pragma shader_feature_local _USEALPHACLIPPING // enable _UseAlphaClipping keyword support
+
+            // -------------------------------------
+            // Universal Pipeline keywords
+            #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT // forward-only variant
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
+
+            // -------------------------------------
+            // Unity defined keywords
+            #pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
+
+            //--------------------------------------
+            // GPU Instancing
+            #pragma multi_compile_instancing
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+
+            //--------------------------------------
+            // Defines
+
+            // -------------------------------------
+            // Includes
+            // - all shader logic written inside this .hlsl, remember to write all #define BEFORE writing #include
+            #include "HsrCharacterShaderCore.hlsl"
+
+            ENDHLSL
+        }
+        Pass
+        {
+            Name "ShadowCaster"
+            Tags
+            {
+                "LightMode" = "ShadowCaster"
+            }
+            ZWrite On
+            ZTest LEqual    
+            ColorMask 0
+            Cull Off
+            HLSLPROGRAM
+            #pragma multi_compile _ _CAST_SHADOWS_ON
+            #pragma target 2.0
+            #pragma vertex ShadowCasterVert
+            #pragma fragment ShadowCasterFrag
+            #pragma shader_feature_local _USEALPHACLIPPING
+            #pragma multi_compile_instancing
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+            #pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
+            #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+            #define ToonShaderApplyShadowBiasFix
+            #include "HsrCharacterShaderCore.hlsl"
             ENDHLSL
         }
     }

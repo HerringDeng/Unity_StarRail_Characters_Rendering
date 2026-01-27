@@ -16,18 +16,11 @@ struct OutlineData
 
 struct OutlineAttributes
 {
-    float3 positionOS : POSITION;
-    float3 normalOS : NORMAL;
-    float4 tangentOS : TANGENT;
-    float2 uv : TEXCOORD0;
-    float2 uv1 : TEXCOORD1;
-    float4 color : COLOR;
-};
-
-struct OutlineVaryings
-{
-    float2 uv : TEXCOORD0;
-    float4 outlinePostionHCS : SV_POSITION;
+    float3 positionOS;
+    float3 normalOS;
+    float4 tangentOS;
+    float2 uv1;
+    float4 color;
 };
 
 float3 TransformOctahedronUVtoNormalTS(float2 oct, bool negative)
@@ -53,6 +46,13 @@ float3 TransfromOctahedronUVtoNormalVS(float2 oct, float3x3 tnb, bool negative)
     return n;
 }
 
+float3 TransfromOctahedronUVtoNormalWS(float2 oct, float3x3 tnb, bool negative)
+{
+    float3 n = TransformOctahedronUVtoNormalTS(oct, negative);
+    n = mul(n, tnb);
+    return n;
+}
+
 float4 CalculateFixedWidthOutlinePostionHCS(OutlineAttributes input, OutlineData data)
 {
     VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS);
@@ -71,6 +71,7 @@ float4 CalculateFixedWidthOutlinePostionHCS(OutlineAttributes input, OutlineData
     return TransformWViewToHClip(outlinePostionVS);
 }
 
+
 float4 CalculateFixedPixelOutlinePostionHCS(OutlineAttributes input, OutlineData data)
 {
     VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS);
@@ -88,9 +89,9 @@ float4 CalculateFixedPixelOutlinePostionHCS(OutlineAttributes input, OutlineData
     float3 normalWS = TransformViewToWorldDir(normalVS);
     float3 normalHCS = TransformWorldToHClipDir(normalWS);
     float2 outlineOffset = (data.outlineWidth * biasPostionHCS.w * input.color.a) / (_ScreenParams.xy / 2.0);
-    float4 outlinePostionHCS = biasPostionHCS;
-    outlinePostionHCS.xy += normalize(normalHCS.xy) * outlineOffset;
-    return outlinePostionHCS;
+    float4 outlinePositionHCS = biasPostionHCS;
+    outlinePositionHCS.xy += normalize(normalHCS.xy) * outlineOffset;
+    return outlinePositionHCS;
 }
 
 float4 CalculateDynamicWidthOutlinePostionHCS(OutlineAttributes input, OutlineData data)
@@ -117,21 +118,4 @@ float4 CalculateDynamicWidthOutlinePostionHCS(OutlineAttributes input, OutlineDa
     return TransformWViewToHClip(outlinePositionVS);
 }
 
-// OutlineVaryings OutlineVert(OutlineAttributes input)
-// {
-//     OutlineVaryings output;
-//     // fill outline function;
-//     output.uv = input.uv;
-//     return output;
-// }
-
-// half4 OutlineFrag(OutlineVaryings input) : SV_Target
-// {
-//     #if _OUTLINE_OFF
-//         clip(-1);
-//         return 0;
-//     #else
-//         return _OutlineColor;
-//     #endif
-// }
 #endif

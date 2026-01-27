@@ -25,14 +25,17 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
-  - _AREA_BODY
+  - _CAST_SHADOWS_ON
   - _EMISSIONTYPE_PARTLY
   - _EMISSION_ON
   - _OUTLINETYPE_DYNAMIC_WIDTH
   - _OUTLINE_ON
   - _RAMPHUETYPE_WARM
+  - _RECEIVE_SHADOWS_ON
   m_InvalidKeywords:
   - _AMBIENTOCCLUSION_ON
+  - _AREA_BODY
+  - _CASTSHADOWS_ON
   - _DYNAMICOUTLINEWIDTH_ON
   - _DYNAMICOUTLINE_ON
   - _EMISSION_ALL_AREA
@@ -47,6 +50,7 @@ Material:
   - _OUTLINE_NORMALCOMPRESSED_NO
   - _OUTLINE_WIDTH_MODE
   - _RAMPTYPE_WARM
+  - _RECEIVESHADOWS_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -76,9 +80,12 @@ Material:
     m_Ints: []
     m_Floats:
     - _Alpha: 1
+    - _AlphaCutOff: 0.3
     - _AmbientOcclusionIntensity: 0.5
     - _Area: 0
     - _BlendOp: 0
+    - _CastShadows: 1
+    - _Cast_Shadows: 1
     - _Cull: 0
     - _DiffuseEyesMouthArea: 0.2
     - _DiffuseLightUpMinGary: 0
@@ -109,6 +116,11 @@ Material:
     - _OutlineWidthScale: 0.0009
     - _OutlineZBias: 0
     - _RampHueType: 0
+    - _ReceiveShadows: 1
+    - _Receive_Shadows: 1
+    - _ShadowDepthBias: 0.002
+    - _ShadowIntensity: 1
+    - _ShadowNormalBias: 0
     - _SpecularExponent: 20
     - _SpecularLightingIntensity: 8
     - _SrcMode: 1

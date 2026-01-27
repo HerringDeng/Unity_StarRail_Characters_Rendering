@@ -53,48 +53,9 @@ CBUFFER_START(UnityPerMaterial)
     float _OutlineCameraStandardDistance;
 CBUFFER_END
 
-struct ForwardAttributes
-{
-    float3 positionOS : POSITION;
-    float3 normalOS : NORMAL;
-    float4 tangentOS : TANGENT;
-    float2 uv : TEXCOORD0;
-};
+#include "HsrForwardVert.hlsl"
 
-struct ForwardVaryings
-{
-    float2 uv : TEXCOORD0;
-    float4 positionWSAndFogFactor : TEXCOORD1;
-    float3 normalWS : TEXCOORD2;
-    float3 viewDirWS : TEXCOORD3;
-    half3 SH : TEXCOORD4;
-    float4 positionHCS : SV_POSITION;
-};
-
-//blinn-phong高光
-half3 BlinnPhongSpecular(float3 lightDirWS, float3 viewDirWS, float3 normalWS, half3 specularColor, float exponent)
-{
-    float3 h = normalize(lightDirWS + viewDirWS);
-    float3 h_dot_n = saturate(dot(h, normalWS));
-    float3 modifier = pow(h_dot_n, exponent);
-    return specularColor * modifier;
-}
-
-ForwardVaryings ForwardVert(ForwardAttributes input)
-{
-    ForwardVaryings output;
-    VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS);
-    VertexNormalInputs vertexNormalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
-    output.positionHCS = TransformObjectToHClip(input.positionOS.xyz);
-    output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
-    output.positionWSAndFogFactor = float4(vertexInput.positionWS, ComputeFogFactor(vertexInput.positionCS.z));
-    output.normalWS = vertexNormalInput.normalWS;
-    output.viewDirWS = normalize(unity_OrthoParams.w == 0 ? GetCameraPositionWS() - vertexInput.positionWS : GetWorldToViewMatrix()[2].xyz);  // 区分透视相机和正交相机
-    output.SH = SampleSH(lerp(vertexNormalInput.normalWS, float3(0, 0, 0), _FlattenNormal));
-    return output;
-}
-
-half4 ForwardFrag(ForwardVaryings input) : SV_Target
+half4 ForwardFrag(Varyings input) : SV_Target
 {
     // 输入
     half4 baseMap = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv); //采样颜色贴图
@@ -158,10 +119,44 @@ half4 ForwardFrag(ForwardVaryings input) : SV_Target
 }
 
 #include "HsrOutline.hlsl"
-OutlineVaryings OutlineVert(OutlineAttributes input)
+// OutlineVaryings OutlineVert(OutlineAttributes input)
+// {
+//     OutlineVaryings output;
+//     output.outlinePositionHCS = TransformObjectToHClip(input.positionOS.xyz);
+//     #if _OUTLINE_ON
+//         OutlineData data;
+//         data.outlineWidth = _OutlineWidth;
+//         data.outlineZBias = _OutlineZBias;
+//         data.outlineWidthRangeOffset = _OutlineWidthRangeOffset;
+//         data.outlineStandardCameraDistance = _OutlineCameraStandardDistance;
+//         #if _OUTLINETYPE_FIXED_WIDTH
+//             output.outlinePositionHCS = CalculateFixedWidthOutlinePostionHCS(input, data);
+//         #elif _OUTLINETYPE_FIXED_PIXEL
+//             output.outlinePositionHCS = CalculateFixedPixelOutlinePostionHCS(input, data);
+//         #elif _OUTLINETYPE_DYNAMIC_WIDTH
+//             output.outlinePositionHCS = CalculateDynamicWidthOutlinePostionHCS(input, data);
+//         #endif
+//     #endif
+//     output.uv = input.uv;
+//     return output;
+// }
+
+// half4 OutlineFrag(OutlineVaryings input) : SV_Target
+// {
+//     half4 final = 0;
+//     #if _OUTLINE_OFF
+//         clip(-1);
+//     #elif _OUTLINE_ON
+//         final = _OutlineColor;
+//         clip(final.a - _AlphaCutOff);
+//     #endif
+//     return final;
+// }
+
+Varyings DepthOnlyVert(OutlineAttributes input)
 {
-    OutlineVaryings output;
-    output.outlinePostionHCS = TransformObjectToHClip(input.positionOS.xyz);
+    Varyings output;
+    output.positionHCS = TransformObjectToHClip(input.positionOS.xyz);
     #if _OUTLINE_ON
         OutlineData data;
         data.outlineWidth = _OutlineWidth;
@@ -169,26 +164,80 @@ OutlineVaryings OutlineVert(OutlineAttributes input)
         data.outlineWidthRangeOffset = _OutlineWidthRangeOffset;
         data.outlineStandardCameraDistance = _OutlineCameraStandardDistance;
         #if _OUTLINETYPE_FIXED_WIDTH
-            output.outlinePostionHCS = CalculateFixedWidthOutlinePostionHCS(input, data);
+            output.positionHCS = CalculateFixedWidthOutlinePostionHCS(input, data);
         #elif _OUTLINETYPE_FIXED_PIXEL
-            output.outlinePostionHCS = CalculateFixedPixelOutlinePostionHCS(input, data);
+            output.positionHCS = CalculateFixedPixelOutlinePostionHCS(input, data);
         #elif _OUTLINETYPE_DYNAMIC_WIDTH
-            output.outlinePostionHCS = CalculateDynamicWidthOutlinePostionHCS(input, data);
+            output.positionHCS = CalculateDynamicWidthOutlinePostionHCS(input, data);
         #endif
     #endif
     output.uv = input.uv;
     return output;
 }
 
-half4 OutlineFrag(OutlineVaryings input) : SV_Target
+half DepthOnlyFrag(Varyings input) : SV_Target
 {
-    half4 final = 0;
-    #if _OUTLINE_OFF
-        clip(-1);
-    #elif _OUTLINE_ON
-        final = _OutlineColor;
-        clip(final.a - _AlphaCutOff);
+    clip(_Alpha-_AlphaCutOff);
+    #ifdef LOD_FADE_CROSSFADE
+    LODFadeCrossFade(input.positionHCS);
     #endif
-    return final;
+    return input.positionHCS.z;
+}
+
+void DepthNormalsFrag(
+    Varyings input
+    , out half4 outNormalWS : SV_Target0
+#ifdef _WRITE_RENDERING_LAYERS
+    , out float4 outRenderingLayers : SV_Target1
+#endif
+)
+{
+    UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+
+    clip(_Alpha-_AlphaCutOff);
+    #ifdef LOD_FADE_CROSSFADE
+    LODFadeCrossFade(input.positionHCS);
+    #endif
+
+    #if defined(_GBUFFER_NORMALS_OCT)
+        float3 normalWS = normalize(input.normalWS);
+        float2 octNormalWS = PackNormalOctQuadEncode(normalWS);           // values between [-1, +1], must use fp32 on some platforms
+        float2 remappedOctNormalWS = saturate(octNormalWS * 0.5 + 0.5);   // values between [ 0,  1]
+        half3 packedNormalWS = PackFloat2To888(remappedOctNormalWS);      // values between [ 0,  1]
+        outNormalWS = half4(packedNormalWS, 0.0);
+    #else
+        float2 uv = input.uv;
+        #if defined(_PARALLAXMAP)
+            #if defined(REQUIRES_TANGENT_SPACE_VIEW_DIR_INTERPOLATOR)
+                half3 viewDirTS = input.viewDirTS;
+            #else
+                half3 viewDirTS = GetViewDirectionTangentSpace(input.tangentWS, input.normalWS, input.viewDirWS);
+            #endif
+            ApplyPerPixelDisplacement(viewDirTS, uv);
+        #endif
+
+        #if defined(_NORMALMAP) || defined(_DETAIL)
+            float sgn = input.tangentWS.w;      // should be either +1 or -1
+            float3 bitangent = sgn * cross(input.normalWS.xyz, input.tangentWS.xyz);
+            float3 normalTS = SampleNormal(uv, TEXTURE2D_ARGS(_BumpMap, sampler_BumpMap), _BumpScale);
+
+            #if defined(_DETAIL)
+                half detailMask = SAMPLE_TEXTURE2D(_DetailMask, sampler_DetailMask, uv).a;
+                float2 detailUv = uv * _DetailAlbedoMap_ST.xy + _DetailAlbedoMap_ST.zw;
+                normalTS = ApplyDetailNormal(detailUv, normalTS, detailMask);
+            #endif
+
+            float3 normalWS = TransformTangentToWorld(normalTS, half3x3(input.tangentWS.xyz, bitangent.xyz, input.normalWS.xyz));
+        #else
+            float3 normalWS = input.normalWS;
+        #endif
+
+        outNormalWS = half4(NormalizeNormalPerPixel(normalWS), 0.0);
+    #endif
+
+    #ifdef _WRITE_RENDERING_LAYERS
+        uint renderingLayers = GetMeshRenderingLayer();
+        outRenderingLayers = float4(EncodeMeshRenderingLayer(renderingLayers), 0, 0, 0);
+    #endif
 }
 #endif

@@ -21,6 +21,13 @@ Shader "HsrCharacter/HsrCharacterBody"
         [Enum(UnityEngine.Rendering.BlendOp)]_BlendOp ("BlendOp", float) = 0
         [Enum(UnityEngine.Rendering.CullMode)]_Cull ("Cull", float) = 0
 
+        [Header(Shadow Setting)]
+        [Toggle]_Cast_Shadows ("Cast Shadows", Float) = 1
+        [Toggle]_Receive_Shadows ("Receive Shadows", Float) = 1
+        _ShadowIntensity ("Shadow Intensity", Range(0, 1)) = 1.0
+        _ShadowDepthBias( "Shadow Depth Bias", Range(-1, 1)) = 0.1
+        _ShadowNormalBias( "Shadow Normal Bias", Range(-1, 1)) = 0.1
+
         [Header(Diffuse Lighting Setting)]
         _DiffuseLightUpMinGary("Diffuse Minimum Light-up Gary", Range(0, 1)) = 0
         [HideInInspector]_DiffuseEyesMouthArea("Diffuse Eyes and Mouth Area will be Always Light-up", Range(0, 1)) = 0.2
@@ -65,7 +72,7 @@ Shader "HsrCharacter/HsrCharacterBody"
         }
         LOD 100
         HLSLINCLUDE
-        #pragma shader_feature_local _AREA_BODY _AREA_FACE _AREA_HAIR
+        #define _AREA_BODY
         ENDHLSL
 
         Pass
@@ -96,6 +103,7 @@ Shader "HsrCharacter/HsrCharacterBody"
             #pragma multi_compile _RAMPHUETYPE_WARM _RAMPHUETYPE_COOL
             #pragma multi_compile _EMISSION_OFF _EMISSION_ON
             #pragma multi_compile _EMISSIONTYPE_PARTLY _EMISSIONTYPE_WHOLE
+            #pragma multi_compile _ _RECEIVE_SHADOWS_ON
             // -------------------------------------
             // Universal Pipeline keywords
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
@@ -129,7 +137,7 @@ Shader "HsrCharacter/HsrCharacterBody"
             #pragma instancing_options renderinglayer
             #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
             
-            #include"HsrCharacterBodyCore.hlsl"
+            #include "HsrCharacterShaderCore.hlsl"
             ENDHLSL
         }
         Pass
@@ -156,8 +164,6 @@ Shader "HsrCharacter/HsrCharacterBody"
             #pragma fragment OutlineFrag
             #pragma shader_feature_local _OUTLINE_OFF _OUTLINE_ON
             #pragma shader_feature_local _OUTLINETYPE_FIXED_WIDTH _OUTLINETYPE_FIXED_PIXEL _OUTLINETYPE_DYNAMIC_WIDTH
-            // -------------------------------------
-            // Universal Pipeline keywords
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
             #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
             #pragma multi_compile _ EVALUATE_SH_MIXED EVALUATE_SH_VERTEX
@@ -171,10 +177,6 @@ Shader "HsrCharacter/HsrCharacterBody"
             #pragma multi_compile_fragment _ _LIGHT_COOKIES
             #pragma multi_compile _ _FORWARD_PLUS
             #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
-
-
-            // -------------------------------------
-            // Unity defined keywords
             #pragma multi_compile _ LIGHTMAP_SHADOW_MIXING
             #pragma multi_compile _ SHADOWS_SHADOWMASK
             #pragma multi_compile _ DIRLIGHTMAP_COMBINED
@@ -183,14 +185,88 @@ Shader "HsrCharacter/HsrCharacterBody"
             #pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
             #pragma multi_compile_fog
             #pragma multi_compile_fragment _ DEBUG_DISPLAY
-
-            //--------------------------------------
-            // GPU Instancing
             #pragma multi_compile_instancing
             #pragma instancing_options renderinglayer
             #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
 
-            #include "HsrCharacterBodyCore.hlsl"
+            #include "HsrCharacterShaderCore.hlsl"
+            ENDHLSL
+        }
+        Pass
+        {
+            Name "DepthOnly"
+            Tags
+            {
+                "LightMode" = "DepthOnly"
+            }
+            ZWrite On
+            ZTest LEqual  
+            ColorMask R
+            Cull Off
+            HLSLPROGRAM
+            #pragma target 2.0
+            #pragma vertex OutlineVert
+            #pragma fragment DepthOnlyFrag
+            #pragma shader_feature_local _USEALPHACLIPPING
+            #pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
+            #pragma multi_compile_instancing
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+            #include "HsrCharacterShaderCore.hlsl"
+            ENDHLSL
+        }
+        Pass
+        {
+            Name "DepthNormalsOnly"
+            Tags
+            {
+                "LightMode" = "DepthNormalsOnly"
+            }
+
+            ZWrite On
+            ZTest LEqual     
+            ColorMask RGBA
+            Cull Off
+            HLSLPROGRAM
+            #pragma target 2.0
+            #pragma vertex ForwardVert
+            #pragma fragment DepthNormalsFrag
+            #pragma shader_feature_local _USEALPHACLIPPING
+            #pragma shader_feature_local _NORMALMAP
+            #pragma shader_feature_local _PARALLAXMAP
+            #pragma shader_feature_local _ _DETAIL_MULX2 _DETAIL_SCALED
+            #pragma shader_feature_local_fragment _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+            #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
+            #pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
+            #pragma multi_compile_instancing
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+            #include "HsrCharacterShaderCore.hlsl"
+            ENDHLSL
+        }
+        Pass
+        {
+            Name "ShadowCaster"
+            Tags
+            {
+                "LightMode" = "ShadowCaster"
+            }
+            ZWrite On
+            ZTest LEqual    
+            ColorMask 0
+            Cull Off
+            HLSLPROGRAM
+            #pragma multi_compile _ _CAST_SHADOWS_ON
+            #pragma target 2.0
+            #pragma vertex ShadowCasterVert
+            #pragma fragment ShadowCasterFrag
+            #pragma shader_feature_local _USEALPHACLIPPING
+            #pragma multi_compile_instancing
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+            #pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
+            #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+            #define ToonShaderApplyShadowBiasFix
+            #include "HsrCharacterShaderCore.hlsl"
             ENDHLSL
         }
     }
