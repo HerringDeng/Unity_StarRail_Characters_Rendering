@@ -19,7 +19,7 @@ struct OutlineAttributes
     float3 positionOS;
     float3 normalOS;
     float4 tangentOS;
-    float2 uv1;
+    float2 octahedronUV_TS;
     float4 color;
 };
 
@@ -58,7 +58,7 @@ float4 CalculateFixedWidthOutlinePostionHCS(OutlineAttributes input, OutlineData
     VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS);
     VertexNormalInputs vertexNormalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
     float3x3 tnb = float3x3(vertexNormalInput.tangentWS, vertexNormalInput.bitangentWS, vertexNormalInput.normalWS);
-    float3 normalVS = TransfromOctahedronUVtoNormalVS(input.uv1, tnb, false);
+    float3 normalVS = TransfromOctahedronUVtoNormalVS(input.octahedronUV_TS, tnb, false);
     normalVS.z = -0.01;
     // calculate camera bias
     float3 cameraPostionWS = GetCameraPositionWS();
@@ -77,7 +77,7 @@ float4 CalculateFixedPixelOutlinePostionHCS(OutlineAttributes input, OutlineData
     VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS);
     VertexNormalInputs vertexNormalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
     float3x3 tnb = float3x3(vertexNormalInput.tangentWS, vertexNormalInput.bitangentWS, vertexNormalInput.normalWS);
-    float3 normalVS = TransfromOctahedronUVtoNormalVS(input.uv1, tnb, false);
+    float3 normalVS = TransfromOctahedronUVtoNormalVS(input.octahedronUV_TS, tnb, false);
     normalVS.z = -0.01;
     // calculate camera bias
     float3 cameraPostionWS = GetCameraPositionWS();
@@ -99,7 +99,7 @@ float4 CalculateDynamicWidthOutlinePostionHCS(OutlineAttributes input, OutlineDa
     VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS);
     VertexNormalInputs vertexNormalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
     float3x3 tnb = float3x3(vertexNormalInput.tangentWS, vertexNormalInput.bitangentWS, vertexNormalInput.normalWS);
-    float3 normalVS = TransfromOctahedronUVtoNormalVS(input.uv1, tnb, false);
+    float3 normalVS = TransfromOctahedronUVtoNormalVS(input.octahedronUV_TS, tnb, false);
     normalVS.z = -0.01;
     // calculate camera bias
     float3 cameraPostionWS = GetCameraPositionWS();

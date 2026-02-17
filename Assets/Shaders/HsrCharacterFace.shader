@@ -1,4 +1,4 @@
-Shader "HsrCharacter/HsrCharacterBody"
+Shader "HsrCharacter/HsrCharacterFace"
 {
     Properties
     {
@@ -12,6 +12,7 @@ Shader "HsrCharacter/HsrCharacterBody"
         [MainColor] _BaseColor ("Color", Color) = (1, 1, 1, 1)
         _ShadowColor ("Shadow Color", Color) = (0, 0, 0, 1)
         _OutlineColor ("Outline Color", Color) = (0, 0, 0, 1)
+        _NoseOutlineColor("Nose Outline Color", Color) = (0, 0, 0, 1)
 
         [Header(Alpha Blending Setting)]
         _Alpha ("Alpha", Range(0, 1)) = 1.0
@@ -30,10 +31,13 @@ Shader "HsrCharacter/HsrCharacterBody"
 
         [Header(Diffuse Lighting Setting)]
         _DiffuseLightUpMinGary("Diffuse Minimum Light-up Gary", Range(0, 1)) = 0
-        [HideInInspector]_DiffuseEyesMouthArea("Diffuse Eyes and Mouth Area will be Always Light-up", Range(0, 1)) = 0.2
         _DiffuseLightUpThresholdOffset("Diffuse Light-up Threshold Offset", range(-1, 1)) = 0
         _DiffuseLightUpThresholdSoftness ("DiffuseLightUpThreshold Softness", range(0, 1)) = 0
         [KeywordEnum(Warm, Cool)]_RampHueType ("Using Rampmap Texture Hue Type", float) = 0
+        // SDF辅助方位
+        [HideInInspector]_HeadForwardVectorWS ("Head Forward Vector", vector) = (0, 0, 1)
+        [HideInInspector]_HeadRightVectorWS ("Head Right Vector", vector) = (-1, 0, 0)
+        [HideInInspector]_HeadUpVectorWS ("Head Up Vector", vector) = (0, 1, 0)
 
         [Header(Environment Lighting Setting)]
         _IndirectLightingIntensity ("Indirect Lighting Intensity", Range(0, 1)) = 0
@@ -60,6 +64,11 @@ Shader "HsrCharacter/HsrCharacterBody"
         _OutlineZBias ("Outline Z Bias", float) = 0
         _OutlineWidthRangeOffset("Outline Width Range Offset(Dynamic Only)", float) = 0
         _OutlineCameraStandardDistance("Outline Camera Standard Distance(Dynamic Only)", float) = 0
+        // 鼻子描边
+        [Header(Nose Outline Setting)]
+        _NoseOutlineFoVExponent("Nose Outline VoF Exponent", float) = 10
+        _NoseOutlineThreshold ("Nose Outline Threshold", range(0, 1)) = 0.125
+        _NoseOutlineSoftness("Nose Outline Softness", range(0,1)) = 0.125
     }
     SubShader
     {
@@ -72,9 +81,8 @@ Shader "HsrCharacter/HsrCharacterBody"
         }
         LOD 100
         HLSLINCLUDE
-        #define _AREA_BODY
+        #define _AREA_FACE
         ENDHLSL
-
         Pass
         {
             Name "ForwardLit"
@@ -84,8 +92,8 @@ Shader "HsrCharacter/HsrCharacterBody"
             }
             Stencil
             {
-                Ref 1
-                WriteMask 1
+                Ref 3
+                WriteMask 3
                 Comp Always
                 Pass Replace
                 Fail Keep
@@ -98,14 +106,12 @@ Shader "HsrCharacter/HsrCharacterBody"
             
             HLSLPROGRAM
             #pragma target 2.0
-            #pragma vertex ForwardVert // Vertex Shader
-            #pragma fragment ForwardFrag // Fragment Shader
-            #pragma multi_compile _RAMPHUETYPE_WARM _RAMPHUETYPE_COOL
-            #pragma multi_compile _EMISSION_OFF _EMISSION_ON
-            #pragma multi_compile _EMISSIONTYPE_PARTLY _EMISSIONTYPE_WHOLE
+            #pragma vertex ForwardVert
+            #pragma fragment ForwardFrag
+            #pragma multi_compile _ _RAMPHUETYPE_WARM _RAMPHUETYPE_COOL
+            #pragma multi_compile _ _EMISSION_OFF _EMISSION_ON
+            #pragma multi_compile _ _EMISSIONTYPE_PARTLY _EMISSIONTYPE_WHOLE
             #pragma multi_compile _ _RECEIVE_SHADOWS_ON
-            // -------------------------------------
-            // Universal Pipeline keywords
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
             #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
             #pragma multi_compile _ EVALUATE_SH_MIXED EVALUATE_SH_VERTEX
@@ -119,9 +125,6 @@ Shader "HsrCharacter/HsrCharacterBody"
             #pragma multi_compile_fragment _ _LIGHT_COOKIES
             #pragma multi_compile _ _FORWARD_PLUS
             #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
-
-            // -------------------------------------
-            // Unity defined keywords
             #pragma multi_compile _ LIGHTMAP_SHADOW_MIXING
             #pragma multi_compile _ SHADOWS_SHADOWMASK
             #pragma multi_compile _ DIRLIGHTMAP_COMBINED
@@ -130,9 +133,63 @@ Shader "HsrCharacter/HsrCharacterBody"
             #pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
             #pragma multi_compile_fog
             #pragma multi_compile_fragment _ DEBUG_DISPLAY
-
-            //--------------------------------------
-            // GPU Instancing
+            #pragma multi_compile_instancing
+            #pragma instancing_options renderinglayer
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+            
+            #include "HsrCharacterShaderCore.hlsl"
+            ENDHLSL
+        }
+        Pass
+        {
+            Name "EyesMask"
+            Tags
+            {
+                "LightMode" = "UniversalForward"
+            }
+            Stencil
+            {
+                Ref 7
+                WriteMask 7
+                Comp Always
+                Pass Replace
+                Fail Keep
+                ZFail Keep
+            }
+            Blend 0 SrcAlpha OneMinusSrcAlpha, [_SrcBlendAlpha] [_DstBlendAlpha]
+            BlendOp[_BlendOp]
+            Cull[_Cull]
+            ZWrite On
+            ZTest LEqual
+            
+            HLSLPROGRAM
+            #pragma target 2.0
+            #pragma vertex ForwardVert
+            #pragma fragment EyesMaskFrag
+            #pragma multi_compile _ _RAMPHUETYPE_WARM _RAMPHUETYPE_COOL
+            #pragma multi_compile _ _EMISSION_OFF _EMISSION_ON
+            #pragma multi_compile _ _EMISSIONTYPE_PARTLY _EMISSIONTYPE_WHOLE
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+            #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+            #pragma multi_compile _ EVALUATE_SH_MIXED EVALUATE_SH_VERTEX
+            #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+            #pragma multi_compile_fragment _ _REFLECTION_PROBE_BLENDING
+            #pragma multi_compile_fragment _ _REFLECTION_PROBE_BOX_PROJECTION
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT
+            #pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+            #pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
+            #pragma multi_compile_fragment _ _LIGHT_LAYERS
+            #pragma multi_compile_fragment _ _LIGHT_COOKIES
+            #pragma multi_compile _ _FORWARD_PLUS
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
+            #pragma multi_compile _ LIGHTMAP_SHADOW_MIXING
+            #pragma multi_compile _ SHADOWS_SHADOWMASK
+            #pragma multi_compile _ DIRLIGHTMAP_COMBINED
+            #pragma multi_compile _ LIGHTMAP_ON
+            #pragma multi_compile _ DYNAMICLIGHTMAP_ON
+            #pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
+            #pragma multi_compile_fog
+            #pragma multi_compile_fragment _ DEBUG_DISPLAY
             #pragma multi_compile_instancing
             #pragma instancing_options renderinglayer
             #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
@@ -145,7 +202,7 @@ Shader "HsrCharacter/HsrCharacterBody"
             Name "Outline"
             Tags
             {
-                "LightMode" = "UniversalForward"
+                "LightMode" = "Outline"
             }
             Stencil
             {
@@ -192,7 +249,7 @@ Shader "HsrCharacter/HsrCharacterBody"
             #include "HsrCharacterShaderCore.hlsl"
             ENDHLSL
         }
-        Pass
+                Pass
         {
             Name "DepthOnly"
             Tags
@@ -200,9 +257,10 @@ Shader "HsrCharacter/HsrCharacterBody"
                 "LightMode" = "DepthOnly"
             }
             ZWrite On
-            ZTest LEqual  
+            ZTest LEqual   
             ColorMask R
-            Cull Off
+            Cull Off 
+            
             HLSLPROGRAM
             #pragma target 2.0
             #pragma vertex OutlineVert
@@ -212,6 +270,7 @@ Shader "HsrCharacter/HsrCharacterBody"
             #pragma multi_compile_instancing
             #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
             #include "HsrCharacterShaderCore.hlsl"
+
             ENDHLSL
         }
         Pass
@@ -221,27 +280,23 @@ Shader "HsrCharacter/HsrCharacterBody"
             {
                 "LightMode" = "DepthNormalsOnly"
             }
-
             ZWrite On
-            ZTest LEqual     
+            ZTest LEqual           
             ColorMask RGBA
             Cull Off
+
             HLSLPROGRAM
             #pragma target 2.0
             #pragma vertex ForwardVert
             #pragma fragment DepthNormalsFrag
             #pragma shader_feature_local _USEALPHACLIPPING
-            #pragma shader_feature_local _NORMALMAP
-            #pragma shader_feature_local _PARALLAXMAP
-            #pragma shader_feature_local _ _DETAIL_MULX2 _DETAIL_SCALED
-            #pragma shader_feature_local_fragment _ALPHATEST_ON
-            #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
             #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
             #pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
             #pragma multi_compile_instancing
             #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
             #include "HsrCharacterShaderCore.hlsl"
+
             ENDHLSL
         }
         Pass

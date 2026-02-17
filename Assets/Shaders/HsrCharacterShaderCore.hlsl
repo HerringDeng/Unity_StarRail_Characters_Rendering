@@ -13,6 +13,12 @@ TEXTURE2D(_RampMap_Warm);
 SAMPLER(sampler_RampMap_Warm);
 TEXTURE2D(_RampMap_Cool);
 SAMPLER(sampler_RampMap_Cool);
+#if defined(_AREA_HAIR)
+    TEXTURE2D(_FaceRampMap_Warm);
+    SAMPLER(sampler_FaceRampMap_Warm);
+    TEXTURE2D(_FaceRampMap_Cool);
+    SAMPLER(sampler_FaceRampMap_Cool);
+#endif
 
 CBUFFER_START(UnityPerMaterial)
     //贴图
@@ -20,6 +26,8 @@ CBUFFER_START(UnityPerMaterial)
     half4 _SdfLightMap_ST;
     half4 _RampMap_Warm_ST;
     half4 _RampMap_Cool_ST;
+    half4 _FaceRampMap_Warm_ST;
+    half4 _FaceRampMap_Cool_ST;
     //基础参数
     half4 _BaseColor;
     half4 _ShadowColor;
@@ -42,9 +50,11 @@ CBUFFER_START(UnityPerMaterial)
     float _ShadowDepthBias;
     float _ShadowNormalBias;
     #if defined(_AREA_HAIR)
+        half4 _HairFakeShadowColor;
         float _HairFakeShadowHorizontalBias;
         float _HairFakeShadowVerticalBias;
-        float _HairFakeShadowExtend;
+        float _HairFakeShadowRampUV_x;
+        float _HairFakeShadowIntensity;
     #endif
     //漫反射
     float _DiffuseLightUpMinGary;
@@ -88,6 +98,7 @@ struct Attributes
     float4 tangentOS : TANGENT;
     float2 uv : TEXCOORD0;
     float2 uv1 : TEXCOORD1;
+    float2 uv2 : TEXCOORD2;
     half4 color : COLOR;
 };
 
@@ -95,10 +106,10 @@ struct Varyings
 {
     float2 uv : TEXCOORD0;
     float4 positionWSAndFogFactor : TEXCOORD1;
-    float3 normalWS : TEXCOORD2;
-    float3 viewDirWS : TEXCOORD3;
-    half3 SH : TEXCOORD4;
-    float4 shadowCoord : TEXCOORD5;
+    float3 normalWS : TEXCOORD3;
+    float3 viewDirWS : TEXCOORD4;
+    half3 SH : TEXCOORD5;
+    float4 shadowCoord : TEXCOORD6;
     float4 positionHCS : SV_POSITION;
 };
 
@@ -127,9 +138,10 @@ Varyings HairFakeShadowVert(Attributes input)
     Varyings output;
     VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS);
     VertexNormalInputs vertexNormalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
-    output.positionHCS = TransformObjectToHClip(input.positionOS.xyz);
-    output.positionHCS.x += _HairFakeShadowHorizontalBias;
-    output.positionHCS.y += _HairFakeShadowVerticalBias;
+    float3 biasPositionWS = vertexInput.positionWS + half3(_HairFakeShadowHorizontalBias*0.1, _HairFakeShadowVerticalBias*0.1, 0.0);
+    float3 biasPositionVS = TransformWorldToView(biasPositionWS);
+    // calculate outline position
+    output.positionHCS = TransformWViewToHClip(biasPositionVS);
     output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
     output.positionWSAndFogFactor = float4(vertexInput.positionWS, ComputeFogFactor(vertexInput.positionCS.z));
     output.normalWS = vertexNormalInput.normalWS;
@@ -142,7 +154,19 @@ Varyings HairFakeShadowVert(Attributes input)
 
 half4 HairFakeShadowFrag(Varyings input) : SV_Target
 {
-    return _ShadowColor;
+    float2 rampUV = 0;
+    rampUV.x = _HairFakeShadowRampUV_x;
+    rampUV.y = 0.05;
+    half3 rampColor = 0;
+    #if _RAMPHUETYPE_WARM
+        rampColor = SAMPLE_TEXTURE2D(_FaceRampMap_Warm, sampler_FaceRampMap_Warm, rampUV).rgb;
+    #elif _RAMPHUETYPE_COOL
+        rampColor = SAMPLE_TEXTURE2D(_FaceRampMap_Cool, sampler_FaceRampMap_Cool, rampUV).rgb;
+    #endif
+    Light mainLight = GetMainLight(); // 区分透视相机和正交相机
+    half3 mainLightColor = mainLight.color;
+    half3 hairFakeShadowColor = mainLightColor * rampColor * _ShadowColor;
+    return half4(hairFakeShadowColor, _HairFakeShadowIntensity);
 }
 #endif
 
@@ -202,8 +226,7 @@ half4 ForwardFrag(Varyings input) : SV_Target
         half3 rampColor = 0;
         #if _RAMPHUETYPE_WARM
             rampColor = SAMPLE_TEXTURE2D(_RampMap_Warm, sampler_RampMap_Warm, rampUV).rgb;
-        #endif
-        #if _RAMPHUETYPE_COOL
+        #elif _RAMPHUETYPE_COOL
             rampColor = SAMPLE_TEXTURE2D(_RampMap_Cool, sampler_RampMap_Cool, rampUV).rgb;
         #endif
     #else
@@ -345,7 +368,7 @@ Varyings OutlineVert(Attributes input)
         outlineInput.positionOS = input.positionOS;
         outlineInput.normalOS = input.normalOS;
         outlineInput.tangentOS = input.tangentOS;
-        outlineInput.uv1 = input.uv1;
+        outlineInput.octahedronUV_TS = input.uv2;
         outlineInput.color = input.color;
         #if _OUTLINETYPE_FIXED_WIDTH
             output.positionHCS = CalculateFixedWidthOutlinePostionHCS(outlineInput, data);

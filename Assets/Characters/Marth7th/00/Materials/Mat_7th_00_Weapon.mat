@@ -120,7 +120,7 @@ Material:
     - _Receive_Shadows: 1
     - _ShadowDepthBias: 0.002
     - _ShadowIntensity: 1
-    - _ShadowNormalBias: 0.1
+    - _ShadowNormalBias: 0.01
     - _SpecularExponent: 20
     - _SpecularLightingIntensity: 8
     - _SrcMode: 1
@@ -132,7 +132,7 @@ Material:
     - _HeadRightVector: {r: 1, g: 0, b: -0.000000024835268, a: 0}
     - _HeadUpVector: {r: -1.9737297e-14, g: 1, b: -0.0000007947286, a: 0}
     - _NoseOutlineColor: {r: 0, g: 0, b: 0, a: 1}
-    - _OutlineColor: {r: 0, g: 0, b: 0, a: 0}
+    - _OutlineColor: {r: 0.22352941, g: 0.11764706, b: 0.11764706, a: 1}
     - _ShadowColor: {r: 0.83137256, g: 0.75686276, b: 0.77254903, a: 1}
     - _SpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []

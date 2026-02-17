@@ -69,6 +69,14 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _FaceRampMap_Cool:
+        m_Texture: {fileID: 2800000, guid: 80e541ae1f182ff48b08705f62becedf, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FaceRampMap_Warm:
+        m_Texture: {fileID: 2800000, guid: b6e714056a97e684397a0154d72b9cab, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _LightMapTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -109,8 +117,8 @@ Material:
     - _Cast_Shadows: 1
     - _Cull: 0
     - _DiffuseEyesMouthArea: 0.2
-    - _DiffuseLightUpMinGary: 0.3
-    - _DiffuseLightUpThresholdOffset: -0.25
+    - _DiffuseLightUpMinGary: 0.4
+    - _DiffuseLightUpThresholdOffset: -0.32
     - _DiffuseLightUpThresholdSoftness: 0.15
     - _DstMode: 0
     - _DynamicOutlineMaxWidth: 0
@@ -123,10 +131,12 @@ Material:
     - _EnvironmentIntensity: 0
     - _EnvironmentMixBaseIntensity: 0
     - _FlattenNormal: 1
-    - _FrontHairAlpha: 0.4
-    - _HairFakeShadowExtend: 0
+    - _FrontHairAlpha: 0.57
+    - _HairFakeShadowExtend: 0.79
     - _HairFakeShadowHorizontalBias: 0
-    - _HairFakeShadowVerticalBias: 0.02
+    - _HairFakeShadowIntensity: 0.64
+    - _HairFakeShadowRampUV_x: 0
+    - _HairFakeShadowVerticalBias: -0.048
     - _IndirectLightingBaseColorMixing: 0.4
     - _IndirectLightingIntensity: 1
     - _MainLigthColorIntensity: 0
@@ -160,7 +170,7 @@ Material:
     - _RampType: 0
     - _ReceiveShadows: 1
     - _Receive_Shadows: 1
-    - _ShadowDepthBias: 0.07
+    - _ShadowDepthBias: 0.25
     - _ShadowIntensity: 1
     - _ShadowNormalBias: 0.001
     - _SpecularExponent: 20
@@ -175,14 +185,15 @@ Material:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _DarkColor: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
+    - _HairFakeShadowColor: {r: 0.538, g: 0.35391718, b: 0.329256, a: 1}
     - _HeadForwardVector: {r: 0, g: 0.0000007947286, b: 1, a: 0}
-    - _HeadForwardVectorWS: {r: 0, g: 0, b: 1, a: 0}
+    - _HeadForwardVectorWS: {r: 0, g: -0.00000023841858, b: 1.0000004, a: 0}
     - _HeadRightVector: {r: 1, g: 0, b: -0.000000024835268, a: 0}
-    - _HeadRightVectorWS: {r: 1, g: 0, b: 0.00000013659395, a: 0}
+    - _HeadRightVectorWS: {r: 1.0000004, g: -0, b: 0.00000035762787, a: 0}
     - _HeadUpVector: {r: -1.9737297e-14, g: 1, b: -0.0000007947286, a: 0}
-    - _HeadUpVectorWS: {r: 0, g: 1, b: 0, a: 0}
+    - _HeadUpVectorWS: {r: 0.00000035762787, g: 1.0000004, b: -0.00000011920929, a: 0}
     - _NoseOutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _OutlineColor: {r: 0.43529412, g: 0.1764706, b: 0.18431373, a: 1}
-    - _ShadowColor: {r: 0.931, g: 0.8475613, b: 0.8651274, a: 1}
+    - _ShadowColor: {r: 0.9490196, g: 0.8745098, b: 0.89411765, a: 1}
     - _SpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []

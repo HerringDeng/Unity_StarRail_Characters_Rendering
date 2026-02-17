@@ -5,26 +5,26 @@ using UnityEditor;
 using System.Net.Sockets;
 using Unity.VisualScripting;
 
-public class ScaleFixer : MonoBehaviour
+public class DirectionTester : MonoBehaviour
 {
+    public GameObject testedObject;
     void func()
     {
-        Transform[] tl = this.GetComponentsInChildren<Transform>();
-        foreach (Transform i in tl)
-        {
-            i.localScale = new Vector3(1, 1, 1);
-        }
+        Transform transform = testedObject.GetComponent<Transform>();
+        Debug.Log(transform.forward);
+        Debug.Log(transform.up);
+        Debug.Log(transform.right);
     }
 
 #if UNITY_EDITOR
-    [CustomEditor(typeof(ScaleFixer))]
+    [CustomEditor(typeof(DirectionTester))]
     public class InspectorButtonExampleEditor : Editor
     {
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector(); // 绘制默认的Inspector GUI元素
-            ScaleFixer myScript = (ScaleFixer)target;
-            if (GUILayout.Button("平滑法线并保存到uv7"))
+            DirectionTester myScript = (DirectionTester)target;
+            if (GUILayout.Button("显示头部骨骼方向"))
             {
                 myScript.func();
             }

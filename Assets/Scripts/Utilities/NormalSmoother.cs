@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using Unity.Mathematics;
+using JetBrains.Annotations;
 
 public class NormalSmoother : MonoBehaviour
 {
+    public int m_uvChannel;
     private Renderer[] allRenderers;
     public struct NormalWeight
     {
@@ -86,7 +88,8 @@ public class NormalSmoother : MonoBehaviour
             smoothNormals[i] = tbn.MultiplyVector(smoothNormals[i]).normalized;
             compressNormals[i] = OctahedronCompress(smoothNormals[i]);
         }
-        mesh.SetUVs(1, compressNormals);
+        mesh.SetUVs(m_uvChannel, compressNormals);
+        Debug.Log($"平滑法线计算完成, 已存储至uv{m_uvChannel}");
     }
 
     Vector2 OctahedronCompress(Vector3 sn)
@@ -134,7 +137,7 @@ public class NormalSmoother : MonoBehaviour
             DrawDefaultInspector(); // 绘制默认的Inspector GUI元素
             NormalSmoother myScript = (NormalSmoother)target;
 
-            if (GUILayout.Button("平滑法线并保存到uv1"))
+            if (GUILayout.Button($"平滑法线并保存到uv{myScript.m_uvChannel}"))
             {
                 myScript.StartSmooth();
             }

@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 0ac01b4260fa29c4f80cb3e9f1a74b7a
+guid: 2da310d06ff94be47811b8dd2700a7c6
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -34,6 +34,11 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: Mat_7th_00_Hair
     second: {fileID: 2100000, guid: 51c8f0b450b1d5e408fb9ac6113ffee1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Mat_7th_00_Weapon
+    second: {fileID: 2100000, guid: e5a05d6f929f08441ae43e0f03676fd7, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -121,7 +126,7 @@ ModelImporter:
     legStretch: 0.05
     feetSpacing: 0
     globalScale: 1
-    rootMotionBoneName: 
+    rootMotionBoneName: Main
     hasTranslationDoF: 0
     hasExtraRoot: 0
     skeletonHasParents: 1
@@ -129,7 +134,7 @@ ModelImporter:
   autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 2
   humanoidOversampling: 1
-  avatarSetup: 0
+  avatarSetup: 1
   addHumanoidExtraRootOnlyWhenUsingAvatar: 1
   importBlendShapeDeformPercent: 1
   remapMaterialsIfMaterialImportModeIsNone: 0

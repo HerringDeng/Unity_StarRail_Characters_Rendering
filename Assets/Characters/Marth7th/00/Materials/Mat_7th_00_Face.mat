@@ -91,7 +91,7 @@ Material:
     - _DiffuseEyesMouthArea: 0.2
     - _DiffuseLightUpMinGary: 0
     - _DiffuseLightUpThresholdOffset: -0.06
-    - _DiffuseLightUpThresholdSoftness: 0.05
+    - _DiffuseLightUpThresholdSoftness: 0.035
     - _DstMode: 0
     - _Emission: 1
     - _EmissionBaseColorMixing: 0.2
@@ -131,13 +131,13 @@ Material:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
     - _HeadForwardVector: {r: 0, g: 0.0000007947286, b: 1, a: 0}
-    - _HeadForwardVectorWS: {r: 0, g: 0, b: 1, a: 0}
+    - _HeadForwardVectorWS: {r: 0, g: -0.00000023841858, b: 1.0000004, a: 0}
     - _HeadRightVector: {r: 1, g: 0, b: -0.000000024835268, a: 0}
-    - _HeadRightVectorWS: {r: 1, g: 0, b: 0.00000013659395, a: 0}
+    - _HeadRightVectorWS: {r: 1.0000004, g: -0, b: 0.00000035762787, a: 0}
     - _HeadUpVector: {r: -1.9737297e-14, g: 1, b: -0.0000007947286, a: 0}
-    - _HeadUpVectorWS: {r: 0, g: 1, b: 0, a: 0}
+    - _HeadUpVectorWS: {r: 0.00000035762787, g: 1.0000004, b: -0.00000011920929, a: 0}
     - _NoseOutlineColor: {r: 0.498, g: 0.18376201, b: 0.19441415, a: 1}
     - _OutlineColor: {r: 0.43529412, g: 0.1764706, b: 0.18431373, a: 1}
-    - _ShadowColor: {r: 0.95, g: 0.8417, b: 0.8712364, a: 1}
+    - _ShadowColor: {r: 0.9490196, g: 0.873098, b: 0.89278144, a: 1}
     - _SpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []

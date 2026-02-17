@@ -19,7 +19,8 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: 250692080822642071}
   - {fileID: 75161598792395075}
-  m_RendererFeatureMap: 97e56f891ea37a034369c56c13070b01
+  - {fileID: 6670588869184007367}
+  m_RendererFeatureMap: 97e56f891ea37a034369c56c13070b01c72c63f63bb1925c
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -117,3 +118,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 1
   m_Shader: {fileID: 4800000, guid: 0f854b35a0cf61a429bd5dcfea30eddd, type: 3}
+--- !u!114 &6670588869184007367
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a2d9b3a21e277d40af38b9085e1a538, type: 3}
+  m_Name: AddForwardPassRenderFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  m_AddtionalOpaquePassLightModeName:
+  - Outline
+  - HairShadow
+  m_AddtionalTransparentPassLightModeName: []
