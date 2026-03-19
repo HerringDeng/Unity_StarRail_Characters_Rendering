@@ -16,8 +16,8 @@ public class CameraController : MonoBehaviour
         cameraTransform = GetComponent<Transform>();
     }
 
-    // Update is called once per frame
-    void Update()
+    // LateUpdate is called once per frame after all Update calls
+    void LateUpdate()
     {
         Cursor.visible = isCursorLock;
         Cursor.lockState = isCursorLock ? CursorLockMode.Locked : CursorLockMode.None;
