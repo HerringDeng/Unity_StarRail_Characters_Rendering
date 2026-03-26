@@ -19,8 +19,6 @@ public class CameraController : MonoBehaviour
     // LateUpdate is called once per frame after all Update calls
     void LateUpdate()
     {
-        Cursor.visible = isCursorLock;
-        Cursor.lockState = isCursorLock ? CursorLockMode.Locked : CursorLockMode.None;
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             isCursorLock = !isCursorLock;

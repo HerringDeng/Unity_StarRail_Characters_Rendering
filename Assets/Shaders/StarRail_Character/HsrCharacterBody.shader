@@ -74,7 +74,7 @@ Shader "HsrCharacter/HsrCharacterBody"
         HLSLINCLUDE
         #define _AREA_BODY
         ENDHLSL
-
+        
         Pass
         {
             Name "ForwardLit"

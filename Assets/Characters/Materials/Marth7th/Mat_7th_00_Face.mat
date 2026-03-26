@@ -94,11 +94,11 @@ Material:
     - _DiffuseLightUpThresholdSoftness: 0.035
     - _DstMode: 0
     - _Emission: 1
-    - _EmissionBaseColorMixing: 0.2
-    - _EmissionIntensity: 0.03
+    - _EmissionBaseColorMixing: 1
+    - _EmissionIntensity: 0.1
     - _EmissionType: 1
     - _FlattenNormal: 1
-    - _IndirectLightingBaseColorMixing: 0.4
+    - _IndirectLightingBaseColorMixing: 0.3
     - _IndirectLightingIntensity: 1
     - _Metallic: 1
     - _NoseOutlineColorGamma: 1.63

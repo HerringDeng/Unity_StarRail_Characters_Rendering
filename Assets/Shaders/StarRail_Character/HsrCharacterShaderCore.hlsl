@@ -132,6 +132,11 @@ float3 ApplySelfShadowBias(float3 positionWS, float3 normalWS, float3 lightDirec
     return positionWS;
 }
 
+float RGBtoGray(float3 color)
+{
+    return dot(color, float3(0.299, 0.587, 0.114));
+}
+
 #if defined(_AREA_HAIR)
 Varyings HairFakeShadowVert(Attributes input)
 {
@@ -255,13 +260,14 @@ half4 ForwardFrag(Varyings input) : SV_Target
     half3 specularColor = 0;
     half3 specularResult = 0;
     #if defined(_AREA_BODY)
-        specularColor = lerp(mainLightColor.rgb, baseColor, _Metallic);
+        specularColor = lerp(mainLightColor.rgb, RGBtoGray(mainLightColor.rgb)*baseColor, _Metallic);
         specularColor = lerp(half3(0, 0, 0), specularColor, lightMap.b);
         specularResult = BlinnPhongSpecular(mainLightDir, input.viewDirWS, input.normalWS, specularColor, _SpecularExponent);
     #elif defined(_AREA_HAIR)
-        specularColor = lerp(half3(0, 0, 0), baseColor, lightMap.b);
+        specularColor = lerp(half3(0, 0, 0), RGBtoGray(mainLightColor.rgb)*baseColor, lightMap.b);
         specularResult = lerp(half3(0, 0, 0), specularColor, diffuseLightUp);
     #endif
+    specularResult *= mainLightColor;
 
     // 自发光
     half3 emissionResult = 0;
@@ -281,11 +287,36 @@ half4 ForwardFrag(Varyings input) : SV_Target
         float noseOutlineIntensity = 1.0 + _NoseOutlineThreshold - lightMap.b;
         noseOutlineColor = lerp(half3(1,1,1),  _NoseOutlineColor.rgb, smoothstep(noseOutlineIntensity, noseOutlineIntensity+_NoseOutlineSoftness, FoV));
     #endif
+
+    // 多光源
+    half3 addtionalLightingResult = 0;
+    #ifdef _FORWARD_PLUS
+        InputData inputData = (InputData)0;
+        inputData.positionWS = input.positionWSAndFogFactor.xyz;
+        inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(input.positionHCS.xyz);
+        uint lightsCountPlus = GetAdditionalLightsCount();
+        LIGHT_LOOP_BEGIN(lightsCountPlus)
+            Light additionalLight = GetAdditionalLight(lightIndex, input.positionWSAndFogFactor.xyz, 1); 
+            half deputyNoL = saturate(dot(input.normalWS, additionalLight.direction));
+            half3 deputyColor = additionalLight.color * ((additionalLight.distanceAttenuation * additionalLight.shadowAttenuation) * deputyNoL) * baseColor;
+            addtionalLightingResult += deputyColor;
+        LIGHT_LOOP_END
+    #else
+	    uint pixelLightCount = GetAdditionalLightsCount(); // 获取副光源个数
+        for(int i = 0; i < pixelLightCount; i++)        //有几次执行几次判断
+        {
+            Light additionalLight = GetAdditionalLight(i, input.positionWSAndFogFactor.xyz, 1);     //获取其它的副光源世界位置
+            half deputyNoL = saturate(dot(input.normalWS, additionalLight.direction));
+            half3 deputyColor = additionalLight.color * ((additionalLight.distanceAttenuation * additionalLight.shadowAttenuation) * deputyNoL) * baseColor;
+            addtionalLightingResult += deputyColor;
+        }
+    #endif
     
     // 最终输出颜色
     half3 albedo = diffuseLightingResult + diffuseLightingResult*IndirectLightingResult * _IndirectLightingIntensity; //基础色
     albedo += specularResult * _SpecularLightingIntensity;
     albedo += emissionResult * _EmissionIntensity; //自发光
+    albedo += addtionalLightingResult;
     #if defined(_AREA_FACE)
         albedo *= noseOutlineColor;
     #endif
@@ -389,14 +420,15 @@ Varyings OutlineVert(Attributes input)
 
 half4 OutlineFrag(Varyings input) : SV_Target
 {
-    half4 final = 0;
+    half3 final = 0;
     #if _OUTLINE_OFF
         clip(-1);
     #elif _OUTLINE_ON
-        final = _OutlineColor;
-        clip(final.a - _AlphaCutOff);
+        Light mainLight = GetMainLight();
+        final = _OutlineColor.rgb*RGBtoGray(mainLight.color.rgb);
+        clip(_Alpha - _AlphaCutOff);
     #endif
-    return final;
+    return half4(final, _Alpha);
 }
 
 half DepthOnlyFrag(Varyings input) : SV_Target

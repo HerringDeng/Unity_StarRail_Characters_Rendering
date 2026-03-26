@@ -171,7 +171,7 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _IndirectLightingBaseColorMixing: 0.4
+    - _IndirectLightingBaseColorMixing: 0.3
     - _IndirectLightingIntensity: 1
     - _MainLigthColorIntensity: 0
     - _Metallic: 1
@@ -212,7 +212,7 @@ Material:
     - _ShadowNormalBias: 0
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
-    - _SpecularExponent: 20
+    - _SpecularExponent: 8
     - _SpecularHighlights: 1
     - _SpecularIntensity: 1
     - _SpecularLightingIntensity: 8
@@ -228,7 +228,7 @@ Material:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _DarkColor: {r: 0, g: 0, b: 0, a: 1}
-    - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
+    - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
     - _HeadForwardVector: {r: 0, g: 0.0000007947286, b: 1, a: 0}
     - _HeadRightVector: {r: 1, g: 0, b: -0.000000024835268, a: 0}
     - _HeadUpVector: {r: -1.9737297e-14, g: 1, b: -0.0000007947286, a: 0}

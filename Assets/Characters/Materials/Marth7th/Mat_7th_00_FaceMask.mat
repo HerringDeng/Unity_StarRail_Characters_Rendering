@@ -12,13 +12,11 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
-  - _CAST_SHADOWS_ON
   - _EMISSIONTYPE_PARTLY
   - _EMISSION_OFF
   - _OUTLINETYPE_FIXED_WIDTH
   - _OUTLINE_OFF
   - _RAMPHUETYPE_WARM
-  - _RECEIVE_SHADOWS_ON
   m_InvalidKeywords:
   - _AREA_BODY
   - _CASTSHADOWS_ON
@@ -127,7 +125,7 @@ Material:
     - _BlendOp: 0
     - _BumpScale: 1
     - _CastShadows: 1
-    - _Cast_Shadows: 1
+    - _Cast_Shadows: 0
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
     - _Cull: 2
@@ -172,7 +170,7 @@ Material:
     - _RampHueType: 0
     - _RampType: 0
     - _ReceiveShadows: 1
-    - _Receive_Shadows: 1
+    - _Receive_Shadows: 0
     - _SampleGI: 0
     - _ShadowDepthBias: 0
     - _ShadowIntensity: 1
