@@ -204,9 +204,9 @@ half4 ForwardFrag(Varyings input) : SV_Target
     float3 mainLightDir = mainLight.direction;
 
     // 间接光照
-    half3 IndirectLightingResult = input.SH;
-    IndirectLightingResult *= lerp(1, lightMap.r, _AmbientOcclusionIntensity); //光照图红通道记录环境光遮蔽（AO）信息
-    IndirectLightingResult = lerp(IndirectLightingResult, baseColor, _IndirectLightingBaseColorMixing); //环境光颜色混合基础色
+    half3 indirectLightingResult = input.SH;
+    indirectLightingResult *= lerp(1, lightMap.r, _AmbientOcclusionIntensity); //光照图红通道记录环境光遮蔽（AO）信息
+    indirectLightingResult = lerp(indirectLightingResult, baseColor, _IndirectLightingBaseColorMixing); //环境光颜色混合基础色
 
     // 漫反射
     half diffuseLightUp = 0;
@@ -313,7 +313,7 @@ half4 ForwardFrag(Varyings input) : SV_Target
     #endif
     
     // 最终输出颜色
-    half3 albedo = diffuseLightingResult + diffuseLightingResult*IndirectLightingResult * _IndirectLightingIntensity; //基础色
+    half3 albedo = diffuseLightingResult + indirectLightingResult * _IndirectLightingIntensity; //基础色
     albedo += specularResult * _SpecularLightingIntensity;
     albedo += emissionResult * _EmissionIntensity; //自发光
     albedo += addtionalLightingResult;

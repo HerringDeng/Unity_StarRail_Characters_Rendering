@@ -54,6 +54,9 @@ public class SdfRenderController : MonoBehaviour
         {   headForwardDirection = headBone.up;
             headUpDirection = -headBone.right;
             headRightDirection = -headBone.forward;
+            // Debug.DrawRay(headBone.position, headForwardDirection, Color.red);
+            // Debug.DrawRay(headBone.position, headUpDirection, Color.green);
+            // Debug.DrawRay(headBone.position, headRightDirection, Color.blue);
         }
     } 
 
