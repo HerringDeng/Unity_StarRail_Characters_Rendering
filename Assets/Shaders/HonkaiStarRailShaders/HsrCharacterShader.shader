@@ -4,6 +4,8 @@ Shader "HonkaiStarRail_Rendering/HsrCharacterShader"
     {
         [Header(Area Setting)]
         [KeywordEnum(Body, Hair, Face)]_Area ("Area Mask", Float) = 0
+        [Header(Main Color)]
+        [MainColor]_Color ("Color", Color) = (1, 1, 1, 1)
         [Header(Texture Setting)]
         [MainTexture] _BaseMap ("Base Map", 2D) = "white" { }
         _LightMap ("Light Map", 2D) = "white" { }
@@ -12,7 +14,12 @@ Shader "HonkaiStarRail_Rendering/HsrCharacterShader"
         [Header(Alpha Setting)]
         _Alpha ("Alpha", Range(0, 1)) = 1.0
         _CutOffThreshold ("Cut Off Threshold", Range(0, 1)) = 0
+        [Enum(UnityEngine.Rendering.BlendMode)]_SrcMode ("SrcMode", float) = 1
+        [Enum(UnityEngine.Rendering.BlendMode)]_DstMode ("DstMode", float) = 0
+        [Enum(UnityEngine.Rendering.BlendOp)]_BlendOp ("BlendOp", float) = 0
+        [Enum(UnityEngine.Rendering.CullMode)]_Cull ("Cull", float) = 0
         [Header(Shadow Setting)]
+        [Toggle]_ReceiveShadows ("Receive Shadows", Float) = 1
         _ShadowColor ("Shadow Color", Color) = (0, 0, 0, 1)
         _ShadowUsage ("Shadow Usage", Range(0, 1)) = 1.0
         _ShadowDepthBias( "Shadow Depth Bias", Range(-1, 1)) = 0
@@ -72,9 +79,9 @@ Shader "HonkaiStarRail_Rendering/HsrCharacterShader"
             }
             // -------------------------------------
             // Alpha settings
-            Blend One Zero
-            BlendOp Add
-            Cull Off
+            Blend [_SrcMode] [_DstMode]
+            BlendOp [_BlendOp]
+            Cull [_Cull]
             ZWrite On
             ZTest LEqual
             // -------------------------------------
@@ -93,8 +100,9 @@ Shader "HonkaiStarRail_Rendering/HsrCharacterShader"
             #pragma vertex Vert
             #pragma fragment Frag
             // -------------------------------------
-            // Custom keywords
-            #pragma shader_feature _AREA_BODY _AREA_HAIR _AREA_FACE
+            // Material keywords
+            #pragma shader_feature_local _ _AREA_BODY _AREA_HAIR _AREA_FACE
+            #pragma shader_feature_local _ _RECEIVESHADOWS_ON
             // -------------------------------------
             // Universal Pipeline keywords
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
@@ -147,7 +155,7 @@ Shader "HonkaiStarRail_Rendering/HsrCharacterShader"
             #pragma vertex Vert
             #pragma fragment Frag
             // -------------------------------------
-            // Custom keywords
+            // Material keywords
             // -------------------------------------
             // Universal Pipeline keywords
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
@@ -181,6 +189,142 @@ Shader "HonkaiStarRail_Rendering/HsrCharacterShader"
             // -------------------------------------
             // Include Shader Core
             #include "HsrOutlineShader.hlsl"
+            ENDHLSL
+        }
+        Pass
+        {
+            Name "ShadowCaster"
+            Tags
+            {
+                "LightMode" = "ShadowCaster"
+            }
+
+            // -------------------------------------
+            // Render State Commands
+            ZWrite On
+            ZTest LEqual
+            ColorMask 0
+            Cull [_Cull]
+
+            HLSLPROGRAM
+            #pragma target 2.0
+
+            // -------------------------------------
+            // Shader Stages
+            #pragma vertex Vert
+            #pragma fragment Frag
+
+            // -------------------------------------
+            // Material Keywords
+            #pragma shader_feature_local _ALPHATEST_ON
+            //--------------------------------------
+            // GPU Instancing
+            #pragma multi_compile_instancing
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+
+            // -------------------------------------
+            // Universal Pipeline keywords
+
+            // -------------------------------------
+            // Unity defined keywords
+            #pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
+
+            // This is used during shadow map generation to differentiate between directional and punctual light shadows, as they use different formulas to apply Normal Bias
+            #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+
+            // -------------------------------------
+            // Includes
+            #include "HsrCharacterShadowCasterShader.hlsl"
+            ENDHLSL
+        }
+        Pass
+        {
+            Name "DepthOnly"
+            Tags
+            {
+                "LightMode" = "DepthOnly"
+            }
+
+            // -------------------------------------
+            // Render State Commands
+            ZWrite On
+            ColorMask R
+            Cull [_Cull]
+
+            HLSLPROGRAM
+            #pragma target 2.0
+
+            // -------------------------------------
+            // Shader Stages
+            #pragma vertex DepthOnlyVertex
+            #pragma fragment DepthOnlyFragment
+
+            // -------------------------------------
+            // Material Keywords
+            #pragma shader_feature_local _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+
+            // -------------------------------------
+            // Unity defined keywords
+            #pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
+
+            //--------------------------------------
+            // GPU Instancing
+            #pragma multi_compile_instancing
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+
+            // -------------------------------------
+            // Includes
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/LitInput.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthOnlyPass.hlsl"
+            ENDHLSL
+        }
+        Pass
+        {
+            Name "DepthNormals"
+            Tags
+            {
+                "LightMode" = "DepthNormals"
+            }
+
+            // -------------------------------------
+            // Render State Commands
+            ZWrite On
+            Cull [_Cull]
+
+            HLSLPROGRAM
+            #pragma target 2.0
+
+            // -------------------------------------
+            // Shader Stages
+            #pragma vertex DepthNormalsVertex
+            #pragma fragment DepthNormalsFragment
+
+            // -------------------------------------
+            // Material Keywords
+            #pragma shader_feature_local _NORMALMAP
+            #pragma shader_feature_local _PARALLAXMAP
+            #pragma shader_feature_local _ _DETAIL_MULX2 _DETAIL_SCALED
+            #pragma shader_feature_local _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+
+            // -------------------------------------
+            // Unity defined keywords
+            #pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
+
+            // -------------------------------------
+            // Universal Pipeline keywords
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
+
+            //--------------------------------------
+            // GPU Instancing
+            #pragma multi_compile_instancing
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+
+            // -------------------------------------
+            // Includes
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/LitInput.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/LitDepthNormalsPass.hlsl"
             ENDHLSL
         }
     }

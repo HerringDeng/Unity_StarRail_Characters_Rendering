@@ -13,6 +13,8 @@ SAMPLER(sampler_RampMap_Cool);
 CBUFFER_START(UnityPerMaterial)
     //区域
     float _Area;
+    //颜色
+    half4 _Color;
     //贴图
     half4 _BaseMap_ST;
     half4 _LightMap_ST;
@@ -64,6 +66,7 @@ struct Attributes
     float2 uv1 : TEXCOORD1; //《Honkai:StarRail》的“独眼”角色使用uv1控制眼睛不透过头发
     float2 uv2 : TEXCOORD2; //uv2存储八面体压缩后的描边法线
     half4 color : COLOR;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
 struct Varyings
@@ -75,5 +78,6 @@ struct Varyings
     half3 SH : TEXCOORD5;
     float4 shadowCoord : TEXCOORD6;
     float4 positionHCS : SV_POSITION;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 #endif

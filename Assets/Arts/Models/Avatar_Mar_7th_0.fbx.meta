@@ -8,37 +8,37 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Mat_7th_00_Body1
-    second: {fileID: 2100000, guid: ed02e666c690724448b2592036fcc5de, type: 2}
+    second: {fileID: 2100000, guid: ae71732b69dcf684796c28b6c5ab089e, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Mat_7th_00_Body2
-    second: {fileID: 2100000, guid: 6fa8975710902d04391965d52f8426f9, type: 2}
+    second: {fileID: 2100000, guid: 5efe0e4d83569c04eb5cf1c104c41a43, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Mat_7th_00_EyeShadow
-    second: {fileID: 2100000, guid: 1f97e4d9d08f3f745a925c8baf982fc7, type: 2}
+    second: {fileID: 2100000, guid: 49f04ee770b295c49ae6fd993472bc24, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Mat_7th_00_Face
-    second: {fileID: 2100000, guid: 4c23df1010fc6b84484469de605c08b5, type: 2}
+    second: {fileID: 2100000, guid: 2fb1b6218e51a0741bdcab85c1024855, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Mat_7th_00_FaceMask
-    second: {fileID: 2100000, guid: 7e5abdb381371244b9befeb7c40593e6, type: 2}
+    second: {fileID: 2100000, guid: 853fc50e24b24f847aefa93628b57d51, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Mat_7th_00_Hair
-    second: {fileID: 2100000, guid: 51c8f0b450b1d5e408fb9ac6113ffee1, type: 2}
+    second: {fileID: 2100000, guid: 10fc050ff6c101348b6e49ca1f04b180, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Mat_7th_00_Weapon
-    second: {fileID: 2100000, guid: e5a05d6f929f08441ae43e0f03676fd7, type: 2}
+    second: {fileID: 2100000, guid: 2495ef6e149a00a44bbfce7581840792, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -51,7 +51,8 @@ ModelImporter:
     optimizeGameObjects: 0
     removeConstantScaleCurves: 0
     motionNodeName: 
-    rigImportErrors: 
+    rigImportErrors: "Copied Avatar Rig Configuration mis-match. Transform hierarchy
+      does not match:\n\tTransform 'mixamorig:Hips' for human bone 'Hips' not found\n"
     rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
@@ -59,7 +60,7 @@ ModelImporter:
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
     importConstraints: 0
-    animationCompression: 1
+    animationCompression: 3
     animationRotationError: 0.5
     animationPositionError: 0.5
     animationScaleError: 0.5
@@ -126,13 +127,13 @@ ModelImporter:
     legStretch: 0.05
     feetSpacing: 0
     globalScale: 1
-    rootMotionBoneName: Main
+    rootMotionBoneName: 
     hasTranslationDoF: 0
-    hasExtraRoot: 0
+    hasExtraRoot: 1
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
   autoGenerateAvatarMappingIfUnspecified: 1
-  animationType: 2
+  animationType: 3
   humanoidOversampling: 1
   avatarSetup: 1
   addHumanoidExtraRootOnlyWhenUsingAvatar: 1

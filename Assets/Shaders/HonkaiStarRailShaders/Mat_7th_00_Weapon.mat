@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Mat_7th_00_Body2
+  m_Name: Mat_7th_00_Weapon
   m_Shader: {fileID: 4800000, guid: 45749430fd8940c4a9c9c843e2056c58, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -43,7 +43,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 3542e1fa5cd887848887297d2975864a, type: 3}
+        m_Texture: {fileID: 2800000, guid: d6bf25a60c4e81641aa2ee2c1f082e14, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -67,7 +67,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _LightMap:
-        m_Texture: {fileID: 2800000, guid: 81a2e99683247b54fa36d3d2d0bb67f1, type: 3}
+        m_Texture: {fileID: 2800000, guid: b258d3fe35bea8c4e96d4539e28a18ec, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
@@ -112,6 +112,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints:
     - _OutlineMode: 1
+    - _StencilValue: 0
     m_Floats:
     - _Alpha: 1
     - _AlphaClip: 0
@@ -176,6 +177,7 @@ Material:
     - _SrcMode: 1
     - _StencilComp: 8
     - _StencilFail: 0
+    - _StencilOp: 0
     - _StencilPass: 0
     - _StencilReadMask: 255
     - _StencilValue: 0
@@ -193,6 +195,6 @@ Material:
     - _FaceUpDirWS: {r: 0.00000035762787, g: 1.0000004, b: -0.00000011920929, a: 0}
     - _MaskEmissionColor: {r: 1, g: 1, b: 1, a: 1}
     - _OutlineColor: {r: 0.22352941, g: 0.11764706, b: 0.11764706, a: 1}
-    - _ShadowColor: {r: 0.8745098, g: 0.8745098, b: 0.8745098, a: 1}
+    - _ShadowColor: {r: 0.6698113, g: 0.6698113, b: 0.6698113, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []

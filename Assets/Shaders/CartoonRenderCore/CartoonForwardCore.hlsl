@@ -14,14 +14,21 @@ half3 CalculateSphericalHarmonicsEnvironmentAlbedo(half3 baseColor, half3 SH, ha
 
 //漫反射
 //卡通风格漫反射光照(仅强度)
-half CalculateCartoonDiffuseValue(half3 normalWS, half3 mainLightDirWS, half lightThreshold, half thresholdSoftness=0)
+half CalculateCartoonDiffuseValue(half3 normalWS, half3 mainLightDirWS, half lightThreshold, half thresholdSoftness)
 {
     half nol = saturate(dot(normalWS, mainLightDirWS));
     half softBinaryNol = smoothstep(lightThreshold-thresholdSoftness, lightThreshold+thresholdSoftness, nol);
     return softBinaryNol;
 }
+half CalculateCartoonDiffuseValueWithShadow(half3 normalWS, half3 mainLightDirWS, half lightThreshold, half thresholdSoftness, half shadow)
+{
+    half nol = saturate(dot(normalWS, mainLightDirWS));
+    nol = min(nol, shadow); 
+    half softBinaryNol = smoothstep(lightThreshold-thresholdSoftness, lightThreshold+thresholdSoftness, nol);
+    return softBinaryNol;
+}
 //SDF脸部漫反射光照(仅强度)
-half CalculateSdfFaceDiffuseValue(Texture2D sdfMap, SamplerState sdfMapSampler, half2 uv, half3 faceForwardDir, half3 faceUpDir, half3 faceRightDir, half3 mainLightDirWS, half lightThresholdOffset, half thresholdSoftness, bool leftDefault=false)
+half CalculateSdfFaceDiffuseValue(Texture2D sdfMap, SamplerState sdfMapSampler, half2 uv, half3 faceForwardDir, half3 faceUpDir, half3 faceRightDir, half3 mainLightDirWS, half lightThresholdOffset, half thresholdSoftness, bool leftDefault=true)
 {
     if(leftDefault)
     {
@@ -43,28 +50,53 @@ half CalculateSdfFaceDiffuseValue(half4 sdfColor, half3 faceForwardDir, half3 fa
     half softBinaryFol = smoothstep(lightThreshold-thresholdSoftness, lightThreshold+thresholdSoftness, fol);
     return softBinaryFol;
 }
-//附加主光源阴影
-half AttachMainLightShadowToDiffuseValue(half diffuseValue, half mainLightShadow, float shadowUsage)
+half CalculateSdfFaceDiffuseValueWithShadow(Texture2D sdfMap, SamplerState sdfMapSampler, half2 uv, half3 faceForwardDir, half3 faceUpDir, half3 faceRightDir, half3 mainLightDirWS, half lightThresholdOffset, half thresholdSoftness, half shadow, bool leftDefault=true)
 {
-    half res = lerp(diffuseValue, diffuseValue*mainLightShadow, shadowUsage);
+    if(leftDefault)
+    {
+        uv.x = -uv.x;
+    }
+    float3 flattenLightDir = normalize(mainLightDirWS - dot(mainLightDirWS, faceUpDir) * faceUpDir);
+    float rol = dot(faceRightDir, flattenLightDir);
+    float2 sdfUV = float2(sign(rol), 1) * uv;
+    half lightThreshold = 1 - SAMPLE_TEXTURE2D(sdfMap, sdfMapSampler, sdfUV).a + lightThresholdOffset;
+    half fol = saturate(dot(faceForwardDir, flattenLightDir));
+    fol = min(fol, shadow);
+    half softBinaryFol = smoothstep(lightThreshold-thresholdSoftness, lightThreshold+thresholdSoftness, fol);
+    return softBinaryFol;
+}
+half CalculateSdfFaceDiffuseValueWithShadow(half4 sdfColor, half3 faceForwardDir, half3 faceUpDir, half3 mainLightDirWS, half lightThresholdOffset, half thresholdSoftness, half shadow)
+{
+    float3 flattenLightDir = normalize(mainLightDirWS - dot(mainLightDirWS, faceUpDir) * faceUpDir);
+    half lightThreshold = 1 - sdfColor.a + lightThresholdOffset;
+    half fol = saturate(dot(faceForwardDir, flattenLightDir));
+    fol = min(fol, shadow);
+    half softBinaryFol = smoothstep(lightThreshold-thresholdSoftness, lightThreshold+thresholdSoftness, fol);
+    return softBinaryFol;
+}
+//附加主光源阴影
+half AttachMainLightShadowToDiffuseValue(half diffuseValue, half mainLightShadow, float shadowUsage, float mask=1)
+{
+    half res = lerp(diffuseValue, mainLightShadow*diffuseValue, shadowUsage);
+    res = lerp(diffuseValue, res, mask);
     return res;
 }
 //卡通风格漫反射光照
-half3 CalculateCartoonDiffuseAlbedo(half diffuseLighting, half3 baseColor, half3 darkColor, half3 mainLightColor)
+half3 CalculateCartoonDiffuseAlbedo(half diffuseValue, half3 baseColor, half3 darkColor, half3 mainLightColor)
 {
-    half3 res = baseColor*lerp(darkColor, half3(1, 1, 1), diffuseLighting)*mainLightColor;
+    half3 res = baseColor*lerp(darkColor, half3(1, 1, 1), diffuseValue)*mainLightColor;
     return res;
 }
 //带Ramp阴影的卡通风格漫反射光照
-half3 CalculateRampCartoonDiffuseAlbedo(half diffuseLighting, half3 baseColor, half3 darkColor, half3 mainLightColor, Texture2D rampMap, SamplerState rampMapSampler, float2 rampUV)
+half3 CalculateRampCartoonDiffuseAlbedo(half diffuseValue, half3 baseColor, half3 darkColor, half3 mainLightColor, Texture2D rampMap, SamplerState rampMapSampler, float2 rampUV)
 {
     half3 rampColor = SAMPLE_TEXTURE2D(rampMap, rampMapSampler, rampUV).rgb;
-    half3 res = CalculateCartoonDiffuseAlbedo(diffuseLighting, baseColor, darkColor, mainLightColor) * rampColor;
+    half3 res = CalculateCartoonDiffuseAlbedo(diffuseValue, baseColor, darkColor, mainLightColor) * rampColor;
     return res;
 }
-half3 CalculateRampCartoonDiffuseAlbedo(half diffuseLighting, half3 baseColor, half3 darkColor, half3 mainLightColor, half3 rampColor)
+half3 CalculateRampCartoonDiffuseAlbedo(half diffuseValue, half3 baseColor, half3 darkColor, half3 mainLightColor, half3 rampColor)
 {
-    half3 res = CalculateCartoonDiffuseAlbedo(diffuseLighting, baseColor, darkColor, mainLightColor) * rampColor;
+    half3 res = CalculateCartoonDiffuseAlbedo(diffuseValue, baseColor, darkColor, mainLightColor) * rampColor;
     return res;
 }
 //混合冷暖RampMap

@@ -10,6 +10,8 @@
 
 Varyings Vert(Attributes input)
 {
+    UNITY_SETUP_INSTANCE_ID(input);
+    UNITY_TRANSFER_INSTANCE_ID(input, output);
     Varyings output;
     VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS);
     VertexNormalInputs vertexNormalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
@@ -17,7 +19,7 @@ Varyings Vert(Attributes input)
     output.normalWS = vertexNormalInput.normalWS;
     output.viewDirWS = normalize(unity_OrthoParams.w == 0 ? GetCameraPositionWS() - vertexInput.positionWS : GetWorldToViewMatrix()[2].xyz);  // 区分透视相机和正交相机;
     output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
-    output.SH = SampleSH(float3(0, 0, 0));
+    output.SH = SampleSH(float3(0,0,0));
     output.shadowCoord = GetShadowCoord(vertexInput);
     output.positionHCS = TransformObjectToHClip(input.positionOS.xyz);
     return output;
@@ -25,13 +27,15 @@ Varyings Vert(Attributes input)
 
 half4 Frag(Varyings input) : SV_Target
 {
+    UNITY_SETUP_INSTANCE_ID(input);
     // 基本参数
     half4 baseMap = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv);
-    half3 baseColor = baseMap.rgb;
+    half3 baseColor = baseMap.rgb * _Color;
     half4 lightMap = SAMPLE_TEXTURE2D(_LightMap, sampler_LightMap, input.uv);
     Light mainLight = GetMainLight(input.shadowCoord); // 区分透视相机和正交相机
     half3 mainLightColor = mainLight.color;
     float3 mainLightDirWS = mainLight.direction;
+    half mainLightShadow = MainLightRealtimeShadow(input.shadowCoord);
 
     // 间接光照
     half3 environmentAlbedo=0;
@@ -44,16 +48,23 @@ half4 Frag(Varyings input) : SV_Target
     // 漫反射
     half diffuseValue = 0;
     float2 rampUV = 0;
+    half shadow = 1;
+    half shadowMask = 1;
+#if _RECEIVESHADOWS_ON
+    shadow = mainLightShadow;
+#endif
 #if _AREA_BODY||_AREA_HAIR
     float diffuseThreshold = lerp(10, 1-lightMap.g, step(0.2, lightMap.g));
-    diffuseValue = CalculateCartoonDiffuseValue(input.normalWS, mainLightDirWS, diffuseThreshold+_DiffuseThresholdOffset, _DiffuseThresholdSoftness);
+    diffuseValue = CalculateCartoonDiffuseValueWithShadow(input.normalWS, mainLightDirWS, diffuseThreshold+_DiffuseThresholdOffset, _DiffuseThresholdSoftness, shadow);
+    //diffuseValue = CalculateCartoonDiffuseValue(input.normalWS, mainLightDirWS, diffuseThreshold+_DiffuseThresholdOffset, _DiffuseThresholdSoftness);
     rampUV = float2(diffuseValue, lightMap.a);
 #elif _AREA_FACE
-    diffuseValue = CalculateSdfFaceDiffuseValue(_LightMap, sampler_LightMap, input.uv, _FaceForwardDirWS, _FaceUpDirWS, _FaceRightDirWS, mainLightDirWS, _DiffuseThresholdOffset, _DiffuseThresholdSoftness);
+    diffuseValue = CalculateSdfFaceDiffuseValueWithShadow(_LightMap, sampler_LightMap, input.uv, _FaceForwardDirWS, _FaceUpDirWS, _FaceRightDirWS, mainLightDirWS, _DiffuseThresholdOffset, _DiffuseThresholdSoftness, shadow);
+    //diffuseValue = CalculateSdfFaceDiffuseValue(_LightMap, sampler_LightMap, input.uv, _FaceForwardDirWS, _FaceUpDirWS, _FaceRightDirWS, mainLightDirWS, _DiffuseThresholdOffset, _DiffuseThresholdSoftness);
+    shadowMask = 1-step(0.2, lightMap.r);
+    diffuseValue = lerp(1, diffuseValue, shadowMask);
     rampUV = float2(diffuseValue, 0.05);
 #endif
-    half mainLightShadow = MainLightRealtimeShadow(input.shadowCoord);
-    diffuseValue = AttachMainLightShadowToDiffuseValue(diffuseValue, mainLightShadow, _ShadowUsage);
     half3 coolRampColor = SAMPLE_TEXTURE2D(_RampMap_Cool, sampler_RampMap_Cool, rampUV).rgb;
     half3 warmRampColor = SAMPLE_TEXTURE2D(_RampMap_Warm, sampler_RampMap_Warm, rampUV).rgb;
     half3 rampColor = BlendCoolWarmRampMap(coolRampColor, warmRampColor, _RampMapTemperature);
@@ -65,6 +76,9 @@ half4 Frag(Varyings input) : SV_Target
     specularAlbedo = CalculateSpecularAlbedo(baseColor, mainLightColor, 1, input.normalWS, mainLightDirWS, input.viewDirWS, _SpecularSmoothness, lightMap.b)*_SpecularIntensity;
 #elif _AREA_FACE
     specularAlbedo = 0;
+#endif
+#if _RECEIVESHADOWS_ON
+    specularAlbedo *= mainLightShadow;
 #endif
 
     // 自发光
@@ -82,7 +96,7 @@ half4 Frag(Varyings input) : SV_Target
     // 输出
     half4 final = half4(0, 0, 0, _Alpha);
     final.rgb = environmentAlbedo + diffuseAlbedo + specularAlbedo + emissionColor + maskEmissionColor;
-    // final.rgb = half3(0.1, 0.1, 0.1) * sceneEyeDepth;
+    // final.rgb = half3(1,1,1)*diffuseValue;
     // clip(final.a-_CutOffThreshold);
     return final;
 }

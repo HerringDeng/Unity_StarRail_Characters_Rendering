@@ -41,7 +41,7 @@ public class CameraController : MonoBehaviour
         }
         Vector3 targetDirection = viewFollowTarget.position - cameraTransform.position;
         Vector3 newDirection = Vector3.RotateTowards(transform.forward, targetDirection, followSpeed*Time.deltaTime, 0.0f);
-        Debug.DrawRay(transform.position, newDirection, Color.red);
+        // Debug.DrawRay(transform.position, newDirection, Color.red);
         cameraTransform.rotation = Quaternion.LookRotation(newDirection);
     }
 }
